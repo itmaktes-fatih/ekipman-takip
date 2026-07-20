@@ -1,41 +1,46 @@
 name: Otomatik APK Derleyici
-on: [push, pull_request]
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-22.04
+
     steps:
-      - name: Kodu Cek
-        uses: actions/checkout@v3
+      - name: Repodaki Kodu Cek
+        uses: actions/checkout@v4
 
       - name: Python Kurulumu
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: Buildozer Bagimliliklarini Yukle
+      - name: Sistem Bagimliliklarini Yukle
         run: |
           sudo apt-get update
-          sudo apt-get install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libssl-dev cmake
+          sudo apt-get install -y build-essential libssl-dev libffi-dev python3-dev \
+            git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev \
+            libncurses5-dev cmake ccache
 
-      - name: Buildozer Kur
+      - name: Buildozer ve Cython Kur
         run: |
           pip install --upgrade pip
-          pip install buildozer cython virtualenv
+          pip install "cython<3.0.0" buildozer virtualenv
 
-      - name: Buildozer Ayar Dosyasi Olustur ve APK Derle
+      - name: Buildozer spec Olustur ve APK Derle
         run: |
           buildozer init
-          # Uygulama adını ve paket kimliğini tanımlıyoruz
           sed -i 's/title = My Application/title = Ekipman Periyodik Kontrol Takibi/g' buildozer.spec
           sed -i 's/package.name = myapp/package.name = ekipman_kontrol_takibi/g' buildozer.spec
           sed -i 's/package.domain = org.test/package.domain = org.isg/g' buildozer.spec
           sed -i 's/requirements = python3,kivy/requirements = python3,kivy,requests,certifi/g' buildozer.spec
-          # Android APK Derleme Adımı
           buildozer android debug
 
-      - name: APK Dosyasini Cikti Olarak Paylas
-        uses: actions/upload-artifact@v3
+      - name: APK Dosyasini Paylas
+        uses: actions/upload-artifact@v4
         with:
           name: Ekipman_Periyodik_Kontrol_Takibi_APK
           path: bin/*.apk
