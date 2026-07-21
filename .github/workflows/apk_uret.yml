@@ -17,7 +17,7 @@ jobs:
 
       - name: APK Derle
         run: |
-          buildozer android debug
+          buildozer --warn_on_root=0 android debug
 
       - name: APK Dosyasini Paylas
         uses: actions/upload-artifact@v4
