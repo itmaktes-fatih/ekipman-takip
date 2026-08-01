@@ -12,9 +12,9 @@ from services.sorumlu_service import SorumluService
 
 class EkipmanService:
 
-    # ======================================================
-    # TÜM EKİPMANLAR
-    # ======================================================
+    # =====================================================
+    # TÜM EKİPMANLARI GETİR
+    # =====================================================
 
     @classmethod
     def tumunu_getir(cls, force_refresh=False):
@@ -46,7 +46,9 @@ class EkipmanService:
 
         return liste
 
-    # ======================================================
+    # =====================================================
+    # FIREBASE KEY İLE GETİR
+    # =====================================================
 
     @classmethod
     def getir(cls, firebase_key):
@@ -58,7 +60,25 @@ class EkipmanService:
 
         return None
 
-    # ======================================================
+    # =====================================================
+    # EKİPMAN ID İLE GETİR
+    # =====================================================
+
+    @classmethod
+    def id_ile_getir(cls, ekipman_id):
+
+        ekipman_id = ekipman_id.strip().lower()
+
+        for ekipman in cls.tumunu_getir():
+
+            if ekipman.ekipman_id.lower() == ekipman_id:
+                return ekipman
+
+        return None
+
+    # =====================================================
+    # EKLE
+    # =====================================================
 
     @classmethod
     def ekle(cls, ekipman: Ekipman):
@@ -69,15 +89,17 @@ class EkipmanService:
                 "Bu ekipman ID'si zaten kayıtlı."
             )
 
-        key = firebase.ekipman_ekle(
+        firebase_key = firebase.ekipman_ekle(
             ekipman.to_dict()
         )
 
         Cache.temizle()
 
-        return key
+        return firebase_key
 
-    # ======================================================
+    # =====================================================
+    # GÜNCELLE
+    # =====================================================
 
     @classmethod
     def guncelle(cls, ekipman: Ekipman):
@@ -103,7 +125,9 @@ class EkipmanService:
 
         Cache.temizle()
 
-    # ======================================================
+    # =====================================================
+    # PASİF YAP (SOFT DELETE)
+    # =====================================================
 
     @classmethod
     def sil(cls, firebase_key):
@@ -114,26 +138,25 @@ class EkipmanService:
 
         Cache.temizle()
 
-    # ======================================================
+    # =====================================================
+    # ID KONTROL
+    # =====================================================
 
     @classmethod
     def id_var_mi(cls, ekipman_id):
 
-        ekipman_id = ekipman_id.strip().lower()
+        return cls.id_ile_getir(
+            ekipman_id
+        ) is not None
 
-        for ekipman in cls.tumunu_getir():
-
-            if ekipman.ekipman_id.lower() == ekipman_id:
-                return True
-
-        return False
-
-    # ======================================================
+    # =====================================================
+    # ARAMA
+    # =====================================================
 
     @classmethod
-    def ara(cls, metin):
+    def ara(cls, aranan):
 
-        metin = metin.lower().strip()
+        aranan = aranan.strip().lower()
 
         sonuc = []
 
@@ -144,21 +167,29 @@ class EkipmanService:
             ).lower()
 
             if (
-                metin in ekipman.ekipman_adi.lower()
+
+                aranan in ekipman.ekipman_adi.lower()
+
                 or
-                metin in ekipman.ekipman_id.lower()
+
+                aranan in ekipman.ekipman_id.lower()
+
                 or
-                metin in sorumlu
+
+                aranan in sorumlu
+
             ):
 
                 sonuc.append(ekipman)
 
         return sonuc
 
-    # ======================================================
+    # =====================================================
+    # DURUMA GÖRE FİLTRELE
+    # =====================================================
 
     @classmethod
-    def filtrele(cls, durum):
+    def filtrele(cls, durum_rengi):
 
         return [
 
@@ -166,11 +197,57 @@ class EkipmanService:
 
             for ekipman in cls.tumunu_getir()
 
-            if ekipman.durum_rengi == durum
+            if ekipman.durum_rengi == durum_rengi
 
         ]
 
-    # ======================================================
+    # =====================================================
+    # YAKLAŞAN KONTROLLER
+    # =====================================================
+
+    @classmethod
+    def yaklasan_kontroller(cls, gun=30):
+
+        sonuc = []
+
+        for ekipman in cls.tumunu_getir():
+
+            if 0 <= ekipman.kalan_gun <= gun:
+
+                sonuc.append(ekipman)
+
+        sonuc.sort(
+            key=lambda x: x.kalan_gun
+        )
+
+        return sonuc
+
+    # =====================================================
+    # SÜRESİ GEÇENLER
+    # =====================================================
+
+    @classmethod
+    def suresi_gecenler(cls):
+
+        sonuc = [
+
+            ekipman
+
+            for ekipman in cls.tumunu_getir()
+
+            if ekipman.kalan_gun < 0
+
+        ]
+
+        sonuc.sort(
+            key=lambda x: x.kalan_gun
+        )
+
+        return sonuc
+
+    # =====================================================
+    # DASHBOARD
+    # =====================================================
 
     @classmethod
     def dashboard_verisi(cls):
@@ -185,9 +262,7 @@ class EkipmanService:
 
             "yaklasan": 0,
 
-            "gecmis": 0,
-
-            "yaklasan_liste": []
+            "gecmis": 0
 
         }
 
@@ -200,21 +275,16 @@ class EkipmanService:
             elif ekipman.durum_rengi == "warning":
 
                 veri["yaklasan"] += 1
-                veri["yaklasan_liste"].append(
-                    ekipman
-                )
 
             else:
 
                 veri["gecmis"] += 1
 
-        veri["yaklasan_liste"].sort(
-            key=lambda x: x.kalan_gun
-        )
-
         return veri
 
-    # ======================================================
+    # =====================================================
+    # SORUMLU ADI
+    # =====================================================
 
     @classmethod
     def sorumlu_adi(cls, ekipman):
