@@ -3,99 +3,80 @@
 # services/ekipman_service.py
 # ==========================================
 
-from typing import List
-
-import firebase
-import utils
-
 from models import Ekipman
+import firebase
 
 
 class EkipmanService:
 
+    # ======================================================
+    # TÜM EKİPMANLAR
+    # ======================================================
+
     @staticmethod
-    def tumunu_getir() -> List[Ekipman]:
+    def tumunu_getir():
 
-        data = firebase.get_ekipmanlar()
-
-        if not data:
-            return []
+        veriler = firebase.ekipmanlari_getir()
 
         liste = []
 
-        for firebase_key, value in data.items():
+        for key, value in veriler.items():
 
-            try:
+            ekipman = Ekipman.from_firebase(
+                key,
+                value
+            )
 
-                ekipman = Ekipman.from_firebase(
-                    firebase_key,
-                    value
-                )
-
+            if ekipman.aktif:
                 liste.append(ekipman)
 
-            except Exception as e:
-
-                print("Kayıt okunamadı :", e)
-
         liste.sort(
-            key=lambda x: x.kalan_gun
+            key=lambda x: x.ekipman_adi.lower()
         )
 
         return liste
 
+    # ======================================================
+    # TEK EKİPMAN
+    # ======================================================
+
     @staticmethod
-    def dashboard_verisi():
+    def getir(firebase_key):
 
-        ekipmanlar = EkipmanService.tumunu_getir()
+        for ekipman in EkipmanService.tumunu_getir():
 
-        toplam = len(ekipmanlar)
+            if ekipman.firebase_key == firebase_key:
 
-        guvenli = 0
-        yaklasan = 0
-        gecmis = 0
+                return ekipman
 
-        for e in ekipmanlar:
+        return None
 
-            _, _, renk = e.durum
-
-            if renk == "success":
-
-                guvenli += 1
-
-            elif renk == "warning":
-
-                yaklasan += 1
-
-            else:
-
-                gecmis += 1
-
-        return {
-
-            "toplam": toplam,
-
-            "guvenli": guvenli,
-
-            "yaklasan": yaklasan,
-
-            "gecmis": gecmis,
-
-            "yaklasan_liste": ekipmanlar[:10]
-
-        }
+    # ======================================================
+    # EKLE
+    # ======================================================
 
     @staticmethod
     def ekle(ekipman: Ekipman):
+
+        if EkipmanService.id_var_mi(
+                ekipman.ekipman_id):
+
+            raise ValueError(
+                "Bu ekipman ID'si zaten kayıtlı."
+            )
 
         return firebase.ekipman_ekle(
             ekipman.to_dict()
         )
 
+    # ======================================================
+    # GÜNCELLE
+    # ======================================================
+
     @staticmethod
     def guncelle(ekipman: Ekipman):
 
-        return firebase.ekipman_guncelle(
+        firebase.ekipman_guncelle(
 
             ekipman.firebase_key,
 
@@ -103,34 +84,104 @@ class EkipmanService:
 
         )
 
+    # ======================================================
+    # PASİF YAP
+    # ======================================================
+
     @staticmethod
     def sil(firebase_key):
 
-        return firebase.ekipman_sil(firebase_key)
+        firebase.ekipman_pasif_yap(
+            firebase_key
+        )
+
+    # ======================================================
+    # ID KONTROL
+    # ======================================================
 
     @staticmethod
-    def ara(kelime: str):
+    def id_var_mi(ekipman_id):
 
-        kelime = kelime.lower()
+        ekipman_id = ekipman_id.strip().lower()
+
+        for ekipman in EkipmanService.tumunu_getir():
+
+            if ekipman.ekipman_id.lower() == ekipman_id:
+
+                return True
+
+        return False
+
+    # ======================================================
+    # ARAMA
+    # ======================================================
+
+    @staticmethod
+    def ara(metin):
+
+        metin = metin.lower()
 
         sonuc = []
 
-        for e in EkipmanService.tumunu_getir():
+        for ekipman in EkipmanService.tumunu_getir():
 
             if (
 
-                kelime in e.ekipman_adi.lower()
+                metin in ekipman.ekipman_adi.lower()
 
                 or
 
-                kelime in e.ekipman_id.lower()
-
-                or
-
-                kelime in e.sorumlu.lower()
+                metin in ekipman.ekipman_id.lower()
 
             ):
 
-                sonuc.append(e)
+                sonuc.append(ekipman)
 
         return sonuc
+
+    # ======================================================
+    # DASHBOARD
+    # ======================================================
+
+    @staticmethod
+    def dashboard_verisi():
+
+        ekipmanlar = EkipmanService.tumunu_getir()
+
+        veri = {
+
+            "toplam": len(ekipmanlar),
+
+            "guvenli": 0,
+
+            "yaklasan": 0,
+
+            "gecmis": 0,
+
+            "yaklasan_liste": []
+
+        }
+
+        for ekipman in ekipmanlar:
+
+            if ekipman.durum_rengi == "success":
+
+                veri["guvenli"] += 1
+
+            elif ekipman.durum_rengi == "warning":
+
+                veri["yaklasan"] += 1
+
+                veri["yaklasan_liste"].append(
+                    ekipman
+                )
+
+            else:
+
+                veri["gecmis"] += 1
+
+        veri["yaklasan_liste"].sort(
+            key=lambda x: x.kalan_gun
+        )
+
+        return veri
