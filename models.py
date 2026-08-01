@@ -50,6 +50,18 @@ class Ekipman:
             self.kalan_gun
         )
 
+    @property
+    def durum_yazisi(self):
+        return self.durum[0]
+
+    @property
+    def durum_ikonu(self):
+        return self.durum[1]
+
+    @property
+    def durum_rengi(self):
+        return self.durum[2]
+
     def to_dict(self):
 
         return {
