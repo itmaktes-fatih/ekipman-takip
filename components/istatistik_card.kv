@@ -1,1 +1,43 @@
+<IstatistikCard>
 
+    orientation: "vertical"
+
+    padding: "15dp"
+
+    spacing: "10dp"
+
+    radius: [18]
+
+    elevation: 2
+
+    size_hint_y: None
+
+    height: "130dp"
+
+    MDIcon:
+
+        icon: root.icon
+
+        halign: "center"
+
+        font_size: "34sp"
+
+        theme_icon_color: "Custom"
+
+        icon_color: root.icon_color
+
+    MDLabel:
+
+        text: root.title
+
+        halign: "center"
+
+        bold: True
+
+    MDLabel:
+
+        text: root.value
+
+        halign: "center"
+
+        font_style: "HeadlineMedium"
