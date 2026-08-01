@@ -8,11 +8,13 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
 
-from config import FIREBASE_CREDENTIAL_PATH, FIREBASE_DATABASE_URL
-
+from config import (
+    FIREBASE_CREDENTIAL_PATH,
+    FIREBASE_DATABASE_URL
+)
 
 # ==========================================================
-# FIREBASE BAĞLANTISI
+# BAĞLANTI
 # ==========================================================
 
 if not firebase_admin._apps:
@@ -31,66 +33,106 @@ if not firebase_admin._apps:
 
     )
 
-
 # ==========================================================
-# REFERANSLAR
-# ==========================================================
-
-ekipman_ref = db.reference("ekipmanlar")
-
-sorumlu_ref = db.reference("sorumlular")
-
-
-# ==========================================================
-# EKİPMAN
+# ROOT
 # ==========================================================
 
-def get_ekipmanlar():
+ROOT = db.reference()
 
-    veri = ekipman_ref.get()
+EKIPMAN_REF = ROOT.child("ekipmanlar")
 
-    return veri if veri else {}
+SORUMLU_REF = ROOT.child("sorumlular")
 
 
-def ekipman_ekle(ekipman):
+# ==========================================================
+# ORTAK
+# ==========================================================
 
-    yeni = ekipman_ref.push()
+def _get(ref):
 
-    yeni.set(
+    data = ref.get()
 
-        ekipman.to_dict()
+    return data if data else {}
 
-    )
+
+def _push(ref, value):
+
+    yeni = ref.push()
+
+    yeni.set(value)
 
     return yeni.key
 
 
-def ekipman_guncelle(firebase_key, ekipman):
+def _update(ref, key, value):
 
-    ekipman_ref.child(
-
-        firebase_key
-
-    ).update(
-
-        ekipman.to_dict()
-
-    )
+    ref.child(key).update(value)
 
 
-def ekipman_soft_delete(firebase_key):
+def _set(ref, key, value):
 
-    ekipman_ref.child(
+    ref.child(key).set(value)
 
-        firebase_key
 
-    ).update(
+def _pasif_yap(ref, key):
+
+    ref.child(key).update(
 
         {
 
             "aktif": False
 
         }
+
+    )
+
+
+# ==========================================================
+# EKİPMANLAR
+# ==========================================================
+
+def ekipmanlari_getir():
+
+    return _get(EKIPMAN_REF)
+
+
+def ekipman_ekle(data: dict):
+
+    return _push(
+
+        EKIPMAN_REF,
+
+        data
+
+    )
+
+
+def ekipman_guncelle(
+
+        firebase_key,
+
+        data: dict
+
+):
+
+    _update(
+
+        EKIPMAN_REF,
+
+        firebase_key,
+
+        data
+
+    )
+
+
+def ekipman_pasif_yap(firebase_key):
+
+    _pasif_yap(
+
+        EKIPMAN_REF,
+
+        firebase_key
 
     )
 
@@ -99,51 +141,51 @@ def ekipman_soft_delete(firebase_key):
 # SORUMLULAR
 # ==========================================================
 
-def get_sorumlular():
+def sorumlulari_getir():
 
-    veri = sorumlu_ref.get()
+    return _get(
 
-    return veri if veri else {}
-
-
-def sorumlu_ekle(sorumlu):
-
-    yeni = sorumlu_ref.push()
-
-    yeni.set(
-
-        sorumlu.to_dict()
-
-    )
-
-    return yeni.key
-
-
-def sorumlu_guncelle(firebase_key, sorumlu):
-
-    sorumlu_ref.child(
-
-        firebase_key
-
-    ).update(
-
-        sorumlu.to_dict()
+        SORUMLU_REF
 
     )
 
 
-def sorumlu_soft_delete(firebase_key):
+def sorumlu_ekle(data: dict):
 
-    sorumlu_ref.child(
+    return _push(
+
+        SORUMLU_REF,
+
+        data
+
+    )
+
+
+def sorumlu_guncelle(
+
+        firebase_key,
+
+        data: dict
+
+):
+
+    _update(
+
+        SORUMLU_REF,
+
+        firebase_key,
+
+        data
+
+    )
+
+
+def sorumlu_pasif_yap(firebase_key):
+
+    _pasif_yap(
+
+        SORUMLU_REF,
 
         firebase_key
-
-    ).update(
-
-        {
-
-            "aktif": False
-
-        }
 
     )
