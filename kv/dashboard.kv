@@ -1,0 +1,135 @@
+<DashboardScreen>
+
+    MDBoxLayout:
+
+        orientation: "vertical"
+
+        padding: "20dp"
+
+        spacing: "15dp"
+
+        MDLabel:
+
+            text: "PERİYODİK KONTROL"
+
+            halign: "center"
+
+            font_style: "HeadlineSmall"
+
+        MDGridLayout:
+
+            cols:2
+
+            spacing:"10dp"
+
+            adaptive_height:True
+
+            MDCard:
+
+                padding:"15dp"
+
+                MDBoxLayout:
+
+                    orientation:"vertical"
+
+                    MDLabel:
+
+                        text:"Toplam"
+
+                    MDLabel:
+
+                        id: lbl_toplam
+
+                        text:"0"
+
+                        font_style:"HeadlineMedium"
+
+            MDCard:
+
+                padding:"15dp"
+
+                MDBoxLayout:
+
+                    orientation:"vertical"
+
+                    MDLabel:
+
+                        text:"Geçerli"
+
+                    MDLabel:
+
+                        id: lbl_guvenli
+
+                        text:"0"
+
+                        font_style:"HeadlineMedium"
+
+            MDCard:
+
+                padding:"15dp"
+
+                MDBoxLayout:
+
+                    orientation:"vertical"
+
+                    MDLabel:
+
+                        text:"Yaklaşan"
+
+                    MDLabel:
+
+                        id: lbl_yaklasan
+
+                        text:"0"
+
+                        font_style:"HeadlineMedium"
+
+            MDCard:
+
+                padding:"15dp"
+
+                MDBoxLayout:
+
+                    orientation:"vertical"
+
+                    MDLabel:
+
+                        text:"Süresi Geçmiş"
+
+                    MDLabel:
+
+                        id: lbl_gecmis
+
+                        text:"0"
+
+                        font_style:"HeadlineMedium"
+
+        MDRaisedButton:
+
+            text:"Ekipmanlar"
+
+        MDRaisedButton:
+
+            text:"Yeni Ekipman"
+
+        MDRaisedButton:
+
+            text:"Sorumlu Kişiler"
+
+        MDLabel:
+
+            text:"Yaklaşan Kontroller"
+
+            bold:True
+
+        ScrollView:
+
+            MDBoxLayout:
+
+                id: yaklasan_liste
+
+                orientation:"vertical"
+
+                adaptive_height:True
+
+                spacing:"10dp"
