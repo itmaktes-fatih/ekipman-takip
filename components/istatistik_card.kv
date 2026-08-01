@@ -1,43 +1,55 @@
-<IstatistikCard>
+<EkipmanCard>
 
-    orientation: "vertical"
+    size_hint_y: None
+    height: "155dp"
 
     padding: "15dp"
 
-    spacing: "10dp"
-
     radius: [18]
 
-    elevation: 2
+    ripple_behavior: True
 
-    size_hint_y: None
+    on_release:
+        root.tiklandi()
 
-    height: "130dp"
+    MDBoxLayout:
 
-    MDIcon:
+        orientation: "vertical"
 
-        icon: root.icon
+        spacing: "8dp"
 
-        halign: "center"
+        MDLabel:
 
-        font_size: "34sp"
+            id: lbl_ad
 
-        theme_icon_color: "Custom"
+            text: ""
 
-        icon_color: root.icon_color
+            bold: True
 
-    MDLabel:
+            font_style: "TitleMedium"
 
-        text: root.title
+        MDLabel:
 
-        halign: "center"
+            id: lbl_id
 
-        bold: True
+            text: ""
 
-    MDLabel:
+        MDLabel:
 
-        text: root.value
+            id: lbl_sorumlu
 
-        halign: "center"
+            text: ""
 
-        font_style: "HeadlineMedium"
+        MDLabel:
+
+            id: lbl_tarih
+
+            text: ""
+
+        MDLabel:
+
+            id: lbl_durum
+
+            text: ""
+
+            theme_text_color: "Custom"
