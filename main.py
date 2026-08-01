@@ -1,50 +1,35 @@
-# ==========================================
-# PERİYODİK KONTROL TAKİP
-# main.py
-# ==========================================
-
 from kivymd.app import MDApp
+from kivy.uix.screenmanager import ScreenManager, FadeTransition
 from kivy.core.window import Window
 
-from config import (
-    APP_NAME,
-    PRIMARY_COLOR,
-    BACKGROUND_COLOR
-)
+from config import APP_NAME
 
 from screens.dashboard import DashboardScreen
+
+
+class AppManager(ScreenManager):
+    pass
 
 
 class PeriyodikKontrolApp(MDApp):
 
     def build(self):
 
-        # Uygulama Başlığı
         self.title = APP_NAME
 
-        # Tema
         self.theme_cls.theme_style = "Dark"
-
         self.theme_cls.primary_palette = "Orange"
 
-        # Pencere Ayarları (Bilgisayarda test için)
-        Window.minimum_width = 400
-        Window.minimum_height = 700
+        Window.minimum_width = 420
+        Window.minimum_height = 760
 
-        # Ana ekran
-        return DashboardScreen()
+        sm = AppManager(
+            transition=FadeTransition(duration=0.20)
+        )
 
-    def on_start(self):
-        """
-        Uygulama açıldığında çalışır.
-        """
-        print(f"{APP_NAME} başlatıldı.")
+        sm.add_widget(DashboardScreen(name="dashboard"))
 
-    def on_stop(self):
-        """
-        Uygulama kapanırken çalışır.
-        """
-        print("Uygulama kapatıldı.")
+        return sm
 
 
 if __name__ == "__main__":
