@@ -3,42 +3,32 @@
 # services/sorumlu_service.py
 # ==========================================
 
-from typing import List
-
-import firebase
-
 from models import Sorumlu
+import firebase
 
 
 class SorumluService:
 
+    # ======================================================
+    # TÜM SORUMLULAR
+    # ======================================================
+
     @staticmethod
-    def tumunu_getir() -> List[Sorumlu]:
-        """
-        Firebase'den tüm sorumluları okur.
-        """
+    def tumunu_getir():
 
-        data = firebase.get_sorumlular()
-
-        if not data:
-            return []
+        veriler = firebase.sorumlulari_getir()
 
         liste = []
 
-        for firebase_key, value in data.items():
+        for key, value in veriler.items():
 
-            try:
+            sorumlu = Sorumlu.from_firebase(
+                key,
+                value
+            )
 
-                sorumlu = Sorumlu.from_firebase(
-                    firebase_key,
-                    value
-                )
-
+            if sorumlu.aktif:
                 liste.append(sorumlu)
-
-            except Exception as e:
-
-                print("Sorumlu okunamadı :", e)
 
         liste.sort(
             key=lambda x: x.ad.lower()
@@ -46,72 +36,132 @@ class SorumluService:
 
         return liste
 
+    # ======================================================
+    # TEK KAYIT
+    # ======================================================
+
     @staticmethod
-    def isim_listesi() -> list:
-        """
-        Dropdown için sadece isimleri döndürür.
-        """
+    def getir(firebase_key):
+
+        for sorumlu in SorumluService.tumunu_getir():
+
+            if sorumlu.firebase_key == firebase_key:
+
+                return sorumlu
+
+        return None
+
+    # ======================================================
+    # EKLE
+    # ======================================================
+
+    @staticmethod
+    def ekle(sorumlu: Sorumlu):
+
+        if SorumluService.isim_var_mi(
+                sorumlu.ad):
+
+            raise ValueError(
+                "Bu isimde bir sorumlu zaten mevcut."
+            )
+
+        return firebase.sorumlu_ekle(
+            sorumlu.to_dict()
+        )
+
+    # ======================================================
+    # GÜNCELLE
+    # ======================================================
+
+    @staticmethod
+    def guncelle(sorumlu: Sorumlu):
+
+        firebase.sorumlu_guncelle(
+
+            sorumlu.firebase_key,
+
+            sorumlu.to_dict()
+
+        )
+
+    # ======================================================
+    # PASİF YAP
+    # ======================================================
+
+    @staticmethod
+    def sil(firebase_key):
+
+        firebase.sorumlu_pasif_yap(
+            firebase_key
+        )
+
+    # ======================================================
+    # İSİM KONTROLÜ
+    # ======================================================
+
+    @staticmethod
+    def isim_var_mi(ad):
+
+        ad = ad.strip().lower()
+
+        for sorumlu in SorumluService.tumunu_getir():
+
+            if sorumlu.ad.lower() == ad:
+
+                return True
+
+        return False
+
+    # ======================================================
+    # ARAMA
+    # ======================================================
+
+    @staticmethod
+    def ara(metin):
+
+        metin = metin.lower()
+
+        sonuc = []
+
+        for sorumlu in SorumluService.tumunu_getir():
+
+            if metin in sorumlu.ad.lower():
+
+                sonuc.append(sorumlu)
+
+        return sonuc
+
+    # ======================================================
+    # DROPDOWN LİSTESİ
+    # ======================================================
+
+    @staticmethod
+    def dropdown_listesi():
 
         return [
 
-            s.ad
+            (
+                s.firebase_key,
+                s.ad
+            )
 
             for s in SorumluService.tumunu_getir()
 
         ]
 
-    @staticmethod
-    def ekle(ad: str):
-
-        ad = ad.strip()
-
-        if ad == "":
-
-            return False
-
-        mevcutlar = [
-
-            x.ad.lower()
-
-            for x in SorumluService.tumunu_getir()
-
-        ]
-
-        if ad.lower() in mevcutlar:
-
-            print("Bu sorumlu zaten kayıtlı.")
-
-            return False
-
-        return firebase.sorumlu_ekle(ad)
+    # ======================================================
+    # ID -> AD
+    # ======================================================
 
     @staticmethod
-    def guncelle(sorumlu: Sorumlu):
+    def ad_getir(firebase_key):
 
-        return firebase.sorumlu_guncelle(
-
-            sorumlu.firebase_key,
-
-            sorumlu.ad
-
+        sorumlu = SorumluService.getir(
+            firebase_key
         )
 
-    @staticmethod
-    def sil(firebase_key):
+        if sorumlu:
 
-        return firebase.sorumlu_sil(firebase_key)
+            return sorumlu.ad
 
-    @staticmethod
-    def ara(kelime: str) -> List[Sorumlu]:
-
-        kelime = kelime.lower()
-
-        sonuc = []
-
-        for s in SorumluService.tumunu_getir():
-
-            if kelime in s.ad.lower():
-
-                sonuc.append(s)
-
-        return sonuc
+        return "-"
