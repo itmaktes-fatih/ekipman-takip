@@ -9,24 +9,30 @@ from typing import Optional
 import utils
 
 
-# --------------------------------------------------
+# ==========================================================
 # EKİPMAN MODELİ
-# --------------------------------------------------
+# ==========================================================
 
 @dataclass
 class Ekipman:
 
+    # Firebase Anahtarı
     firebase_key: Optional[str]
 
+    # Temel Bilgiler
     ekipman_id: str
-
     ekipman_adi: str
 
+    # Kontrol Bilgileri
     son_kontrol: str
-
     periyot: int
 
-    sorumlu: str
+    # İlişkili Sorumlu
+    sorumlu_id: str
+
+    # ------------------------------------------------------
+    # HESAPLANAN ALANLAR
+    # ------------------------------------------------------
 
     @property
     def sonraki_kontrol(self):
@@ -52,15 +58,22 @@ class Ekipman:
 
     @property
     def durum_yazisi(self):
+
         return self.durum[0]
 
     @property
     def durum_ikonu(self):
+
         return self.durum[1]
 
     @property
     def durum_rengi(self):
+
         return self.durum[2]
+
+    # ------------------------------------------------------
+    # FIREBASE
+    # ------------------------------------------------------
 
     def to_dict(self):
 
@@ -74,7 +87,7 @@ class Ekipman:
 
             "periyot": self.periyot,
 
-            "sorumlu": self.sorumlu
+            "sorumlu_id": self.sorumlu_id
 
         }
 
@@ -93,14 +106,14 @@ class Ekipman:
 
             periyot=int(data.get("periyot", 0)),
 
-            sorumlu=data.get("sorumlu", "")
+            sorumlu_id=data.get("sorumlu_id", "")
 
         )
 
 
-# --------------------------------------------------
+# ==========================================================
 # SORUMLU MODELİ
-# --------------------------------------------------
+# ==========================================================
 
 @dataclass
 class Sorumlu:
@@ -109,11 +122,23 @@ class Sorumlu:
 
     ad: str
 
+    telefon: str = ""
+
+    email: str = ""
+
+    aktif: bool = True
+
     def to_dict(self):
 
         return {
 
-            "ad": self.ad
+            "ad": self.ad,
+
+            "telefon": self.telefon,
+
+            "email": self.email,
+
+            "aktif": self.aktif
 
         }
 
@@ -124,6 +149,12 @@ class Sorumlu:
 
             firebase_key=firebase_key,
 
-            ad=data.get("ad", "")
+            ad=data.get("ad", ""),
+
+            telefon=data.get("telefon", ""),
+
+            email=data.get("email", ""),
+
+            aktif=data.get("aktif", True)
 
         )
