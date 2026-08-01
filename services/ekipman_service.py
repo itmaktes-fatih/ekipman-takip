@@ -185,3 +185,20 @@ class EkipmanService:
         )
 
         return veri
+        
+    # ======================================================
+    # DURUM FİLTRESİ
+    # ======================================================
+
+    @staticmethod
+    def filtrele(durum):
+
+        sonuc = []
+
+        for ekipman in EkipmanService.tumunu_getir():
+
+            if ekipman.durum_rengi == durum:
+
+                sonuc.append(ekipman)
+
+        return sonuc
