@@ -4,101 +4,105 @@
 # ==========================================
 
 from datetime import datetime, timedelta
-from config import DATE_FORMAT, SAFE_DAYS, WARNING_DAYS
 
 
-# --------------------------------------------------
-# TARİH İŞLEMLERİ
-# --------------------------------------------------
+DATE_FORMAT = "%d.%m.%Y"
+
+
+# ==========================================================
+# TARİH
+# ==========================================================
+
+def bugun():
+    """Bugünün tarihini datetime olarak döndürür."""
+    return datetime.today()
+
+
+def bugun_str():
+    """Bugünün tarihini string olarak döndürür."""
+    return bugun().strftime(DATE_FORMAT)
+
 
 def tarih_dogrula(tarih: str) -> bool:
-    """
-    Girilen tarihin doğru formatta olup olmadığını kontrol eder.
-    Format : GG.AA.YYYY
-    """
+    """Girilen tarihin formatını kontrol eder."""
 
     try:
         datetime.strptime(tarih, DATE_FORMAT)
         return True
-    except:
+
+    except ValueError:
         return False
 
 
 def str_to_date(tarih: str):
-    """
-    String tarihi datetime nesnesine çevirir.
-    """
 
-    return datetime.strptime(tarih, DATE_FORMAT)
+    return datetime.strptime(
+        tarih,
+        DATE_FORMAT
+    )
 
 
 def date_to_str(tarih: datetime):
-    """
-    Datetime nesnesini string'e çevirir.
-    """
 
-    return tarih.strftime(DATE_FORMAT)
+    return tarih.strftime(
+        DATE_FORMAT
+    )
 
 
-# --------------------------------------------------
+# ==========================================================
 # KONTROL TARİHLERİ
-# --------------------------------------------------
+# ==========================================================
 
-def sonraki_kontrol_tarihi(son_kontrol: str, periyot: int) -> str:
-    """
-    Son kontrol tarihine göre
-    bir sonraki kontrol tarihini hesaplar.
-    """
+def sonraki_kontrol_tarihi(
+        son_kontrol: str,
+        periyot: int
+):
 
-    tarih = str_to_date(son_kontrol)
+    tarih = str_to_date(
+        son_kontrol
+    )
 
-    sonraki = tarih + timedelta(days=int(periyot))
+    sonraki = tarih + timedelta(
+        days=int(periyot)
+    )
 
-    return date_to_str(sonraki)
-
-
-def kalan_gun(sonraki_kontrol: str) -> int:
-    """
-    Kontrole kaç gün kaldığını hesaplar.
-    """
-
-    bugun = datetime.today()
-
-    tarih = str_to_date(sonraki_kontrol)
-
-    return (tarih.date() - bugun.date()).days
+    return date_to_str(
+        sonraki
+    )
 
 
-# --------------------------------------------------
+def kalan_gun(
+        sonraki_kontrol: str
+):
+
+    tarih = str_to_date(
+        sonraki_kontrol
+    )
+
+    fark = tarih - bugun()
+
+    return fark.days
+
+
+# ==========================================================
 # DURUM
-# --------------------------------------------------
+# ==========================================================
 
 def durum_belirle(kalan: int):
-    """
-    Durumu döndürür.
-
-    return
-
-    durum
-
-    ikon
-
-    renk
-    """
 
     if kalan < 0:
 
         return (
             "Süresi Geçmiş",
-            "🔴",
-            "danger"
+            "alert-circle",
+            "error"
         )
 
-    elif kalan <= WARNING_DAYS:
+    elif kalan <= 30:
 
         return (
-            "Yaklaşıyor",
-            "🟡",
+            "Yaklaşan Kontrol",
+            "clock-alert",
             "warning"
         )
 
@@ -106,134 +110,62 @@ def durum_belirle(kalan: int):
 
         return (
             "Geçerli",
-            "🟢",
+            "check-circle",
             "success"
         )
 
 
-# --------------------------------------------------
+# ==========================================================
+# FORMATLAMA
+# ==========================================================
+
+def kalan_gun_yazisi(kalan: int):
+
+    if kalan < 0:
+
+        return f"{abs(kalan)} gün geçti"
+
+    elif kalan == 0:
+
+        return "Bugün"
+
+    elif kalan == 1:
+
+        return "Yarın"
+
+    return f"{kalan} gün kaldı"
+
+
+# ==========================================================
 # DASHBOARD
-# --------------------------------------------------
+# ==========================================================
 
-def dashboard_istatistik(veriler: dict):
+def dashboard_istatistik(ekipmanlar):
 
-    """
-    Dashboard sayılarını hesaplar.
-    """
+    sonuc = {
 
-    toplam = 0
-    guvenli = 0
-    yaklasan = 0
-    gecmis = 0
+        "toplam": len(ekipmanlar),
 
-    yaklasan_liste = []
+        "guvenli": 0,
 
-    if not veriler:
-        return {
+        "yaklasan": 0,
 
-            "toplam": 0,
-            "guvenli": 0,
-            "yaklasan": 0,
-            "gecmis": 0,
-            "yaklasan_liste": []
-
-        }
-
-    for key, veri in veriler.items():
-
-        try:
-
-            toplam += 1
-
-            sonraki = veri["sonraki_kontrol"]
-
-            kalan = kalan_gun(sonraki)
-
-            durum, ikon, renk = durum_belirle(kalan)
-
-            if renk == "success":
-
-                guvenli += 1
-
-            elif renk == "warning":
-
-                yaklasan += 1
-
-                yaklasan_liste.append({
-
-                    "ekipman": veri["ekipman_adi"],
-                    "id": veri["ekipman_id"],
-                    "kalan": kalan
-
-                })
-
-            else:
-
-                gecmis += 1
-
-                yaklasan_liste.append({
-
-                    "ekipman": veri["ekipman_adi"],
-                    "id": veri["ekipman_id"],
-                    "kalan": kalan
-
-                })
-
-        except Exception:
-
-            continue
-
-    yaklasan_liste = sorted(
-        yaklasan_liste,
-        key=lambda x: x["kalan"]
-    )
-
-    return {
-
-        "toplam": toplam,
-
-        "guvenli": guvenli,
-
-        "yaklasan": yaklasan,
-
-        "gecmis": gecmis,
-
-        "yaklasan_liste": yaklasan_liste
+        "gecmis": 0
 
     }
 
+    for e in ekipmanlar:
 
-# --------------------------------------------------
-# EKİPMAN KAYDI
-# --------------------------------------------------
+        if e.durum_rengi == "success":
 
-def ekipman_olustur(
-        ekipman_adi,
-        ekipman_id,
-        son_kontrol,
-        periyot,
-        sorumlu):
+            sonuc["guvenli"] += 1
 
-    """
-    Firebase'e gönderilecek sözlüğü oluşturur.
-    """
+        elif e.durum_rengi == "warning":
 
-    return {
+            sonuc["yaklasan"] += 1
 
-        "ekipman_adi": ekipman_adi.strip(),
+        else:
 
-        "ekipman_id": ekipman_id.strip(),
+            sonuc["gecmis"] += 1
 
-        "son_kontrol": son_kontrol,
-
-        "periyot": int(periyot),
-
-        "sonraki_kontrol":
-            sonraki_kontrol_tarihi(
-                son_kontrol,
-                periyot
-            ),
-
-        "sorumlu": sorumlu.strip()
-
-    }
+    return sonuc
