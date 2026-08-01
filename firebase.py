@@ -3,211 +3,147 @@
 # firebase.py
 # ==========================================
 
-import requests
+import firebase_admin
 
-from config import (
-    FIREBASE_URL,
-    NODE_EKIPMANLAR,
-    NODE_SORUMLULAR
-)
+from firebase_admin import credentials
+from firebase_admin import db
 
-
-# --------------------------------------------------
-# ORTAK URL
-# --------------------------------------------------
-
-def _url(node: str) -> str:
-    """
-    Firebase node adresini oluşturur.
-    """
-
-    return f"{FIREBASE_URL}{node}.json"
+from config import FIREBASE_CREDENTIAL_PATH, FIREBASE_DATABASE_URL
 
 
-def _item_url(node: str, key: str) -> str:
-    """
-    Firebase kayıt adresini oluşturur.
-    """
+# ==========================================================
+# FIREBASE BAĞLANTISI
+# ==========================================================
 
-    return f"{FIREBASE_URL}{node}/{key}.json"
+if not firebase_admin._apps:
+
+    cred = credentials.Certificate(
+        FIREBASE_CREDENTIAL_PATH
+    )
+
+    firebase_admin.initialize_app(
+
+        cred,
+
+        {
+            "databaseURL": FIREBASE_DATABASE_URL
+        }
+
+    )
 
 
-# --------------------------------------------------
-# EKİPMANLAR
-# --------------------------------------------------
+# ==========================================================
+# REFERANSLAR
+# ==========================================================
+
+ekipman_ref = db.reference("ekipmanlar")
+
+sorumlu_ref = db.reference("sorumlular")
+
+
+# ==========================================================
+# EKİPMAN
+# ==========================================================
 
 def get_ekipmanlar():
 
-    try:
+    veri = ekipman_ref.get()
 
-        response = requests.get(
-            _url(NODE_EKIPMANLAR),
-            timeout=10
-        )
-
-        response.raise_for_status()
-
-        return response.json() or {}
-
-    except Exception as e:
-
-        print("Firebase Hatası :", e)
-
-        return {}
+    return veri if veri else {}
 
 
-def ekipman_ekle(veri: dict):
+def ekipman_ekle(ekipman):
 
-    try:
+    yeni = ekipman_ref.push()
 
-        response = requests.post(
-            _url(NODE_EKIPMANLAR),
-            json=veri,
-            timeout=10
-        )
+    yeni.set(
 
-        response.raise_for_status()
+        ekipman.to_dict()
 
-        return True
+    )
 
-    except Exception as e:
-
-        print("Firebase Hatası :", e)
-
-        return False
+    return yeni.key
 
 
-def ekipman_guncelle(key: str, veri: dict):
+def ekipman_guncelle(firebase_key, ekipman):
 
-    try:
+    ekipman_ref.child(
 
-        response = requests.patch(
-            _item_url(NODE_EKIPMANLAR, key),
-            json=veri,
-            timeout=10
-        )
+        firebase_key
 
-        response.raise_for_status()
+    ).update(
 
-        return True
+        ekipman.to_dict()
 
-    except Exception as e:
-
-        print("Firebase Hatası :", e)
-
-        return False
+    )
 
 
-def ekipman_sil(key: str):
+def ekipman_soft_delete(firebase_key):
 
-    try:
+    ekipman_ref.child(
 
-        response = requests.delete(
-            _item_url(NODE_EKIPMANLAR, key),
-            timeout=10
-        )
+        firebase_key
 
-        response.raise_for_status()
+    ).update(
 
-        return True
+        {
 
-    except Exception as e:
+            "aktif": False
 
-        print("Firebase Hatası :", e)
+        }
 
-        return False
+    )
 
 
-# --------------------------------------------------
+# ==========================================================
 # SORUMLULAR
-# --------------------------------------------------
+# ==========================================================
 
 def get_sorumlular():
 
-    try:
+    veri = sorumlu_ref.get()
 
-        response = requests.get(
-            _url(NODE_SORUMLULAR),
-            timeout=10
-        )
-
-        response.raise_for_status()
-
-        data = response.json()
-
-        if not data:
-            return {}
-
-        return data
-
-    except Exception as e:
-
-        print("Firebase Hatası :", e)
-
-        return {}
+    return veri if veri else {}
 
 
-def sorumlu_ekle(ad: str):
+def sorumlu_ekle(sorumlu):
 
-    try:
+    yeni = sorumlu_ref.push()
 
-        response = requests.post(
-            _url(NODE_SORUMLULAR),
-            json={
-                "ad": ad
-            },
-            timeout=10
-        )
+    yeni.set(
 
-        response.raise_for_status()
+        sorumlu.to_dict()
 
-        return True
+    )
 
-    except Exception as e:
-
-        print("Firebase Hatası :", e)
-
-        return False
+    return yeni.key
 
 
-def sorumlu_guncelle(key: str, ad: str):
+def sorumlu_guncelle(firebase_key, sorumlu):
 
-    try:
+    sorumlu_ref.child(
 
-        response = requests.patch(
-            _item_url(NODE_SORUMLULAR, key),
-            json={
-                "ad": ad
-            },
-            timeout=10
-        )
+        firebase_key
 
-        response.raise_for_status()
+    ).update(
 
-        return True
+        sorumlu.to_dict()
 
-    except Exception as e:
-
-        print("Firebase Hatası :", e)
-
-        return False
+    )
 
 
-def sorumlu_sil(key: str):
+def sorumlu_soft_delete(firebase_key):
 
-    try:
+    sorumlu_ref.child(
 
-        response = requests.delete(
-            _item_url(NODE_SORUMLULAR, key),
-            timeout=10
-        )
+        firebase_key
 
-        response.raise_for_status()
+    ).update(
 
-        return True
+        {
 
-    except Exception as e:
+            "aktif": False
 
-        print("Firebase Hatası :", e)
+        }
 
-        return False
+    )
