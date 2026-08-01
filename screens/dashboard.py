@@ -2,6 +2,8 @@ from kivy.lang import Builder
 from kivy.clock import Clock
 
 from kivymd.uix.screen import MDScreen
+from kivymd.uix.card import MDCard
+from kivymd.uix.label import MDLabel
 
 import firebase
 import utils
@@ -12,87 +14,95 @@ Builder.load_file("kv/dashboard.kv")
 
 class DashboardScreen(MDScreen):
 
-    def __init__(self, **kwargs):
-
-        super().__init__(**kwargs)
+    def on_enter(self):
 
         Clock.schedule_once(
-            self.dashboard_yukle,
+            self.verileri_yukle,
             0.2
         )
 
-    def dashboard_yukle(self, *args):
+    def verileri_yukle(self, *args):
 
         veriler = firebase.get_ekipmanlar()
 
         ist = utils.dashboard_istatistik(veriler)
 
         self.ids.lbl_toplam.text = str(ist["toplam"])
-
         self.ids.lbl_guvenli.text = str(ist["guvenli"])
-
         self.ids.lbl_yaklasan.text = str(ist["yaklasan"])
-
         self.ids.lbl_gecmis.text = str(ist["gecmis"])
+
+        self.listeyi_doldur(
+            ist["yaklasan_liste"]
+        )
+
+    def listeyi_doldur(self, liste):
 
         self.ids.yaklasan_liste.clear_widgets()
 
-        for item in ist["yaklasan_liste"]:
+        if len(liste) == 0:
 
             self.ids.yaklasan_liste.add_widget(
 
-                self.kart_olustur(item)
+                MDLabel(
+
+                    text="Yaklaşan kontrol bulunmuyor.",
+
+                    halign="center"
+
+                )
 
             )
 
-    def kart_olustur(self, item):
+            return
 
-        from kivymd.uix.card import MDCard
+        for item in liste:
 
-        from kivymd.uix.label import MDLabel
+            card = MDCard(
 
-        kart = MDCard(
+                orientation="vertical",
 
-            orientation="vertical",
+                radius=[15],
 
-            padding=15,
+                padding=15,
 
-            radius=[15],
+                size_hint_y=None,
 
-            size_hint_y=None,
+                height=85,
 
-            height=90,
-
-            ripple_behavior=True,
-
-            style="filled"
-
-        )
-
-        kart.add_widget(
-
-            MDLabel(
-
-                text=item["ekipman"],
-
-                bold=True,
-
-                font_style="TitleMedium"
+                ripple_behavior=True
 
             )
 
-        )
+            card.add_widget(
 
-        kart.add_widget(
+                MDLabel(
 
-            MDLabel(
+                    text=item["ekipman"],
 
-                text=f'{item["kalan"]} Gün Kaldı',
+                    bold=True
 
-                theme_text_color="Secondary"
+                )
 
             )
 
-        )
+            card.add_widget(
 
-        return kart
+                MDLabel(
+
+                    text=f'{item["kalan"]} gün kaldı'
+
+                )
+
+            )
+
+            self.ids.yaklasan_liste.add_widget(card)
+
+    def yeni_ekipman(self):
+        self.manager.current = "ekipman_formu"
+
+    def ekipmanlar(self):
+        self.manager.current = "ekipman_listesi"
+
+    def sorumlular(self):
+        self.manager.current = "sorumlular"
