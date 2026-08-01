@@ -1,0 +1,46 @@
+<EkipmanListesiScreen>
+
+    MDBoxLayout:
+
+        orientation: "vertical"
+
+        MDTopAppBar:
+
+            title: "Ekipmanlar"
+
+            left_action_items:
+                [["arrow-left", lambda x: root.geri()]]
+
+        MDTextField:
+
+            hint_text: "Ara..."
+
+            mode: "outlined"
+
+            on_text:
+                root.ara(self.text)
+
+        ScrollView:
+
+            MDBoxLayout:
+
+                id: liste
+
+                orientation: "vertical"
+
+                adaptive_height: True
+
+                spacing: "10dp"
+
+                padding: "10dp"
+
+        MDFloatingActionButton:
+
+            icon: "plus"
+
+            pos_hint:
+                {"right": .95,
+                 "y": .03}
+
+            on_release:
+                root.yeni_ekipman()
