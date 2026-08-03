@@ -8,16 +8,45 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: kivy/buildozer:latest
 
     steps:
       - name: Repodaki Kodu Cek
         uses: actions/checkout@v4
 
+      - name: Disk Alanini Temizle
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      - name: Python 3.10 Kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: JDK 17 Kur
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Sistem Bagimliliklarini ve Buildozer'i Kur
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libsqlite3-dev sqlite3 bzip2 libbz2-dev \
+            zlib1g-dev libssl-dev openssl libgdbm-dev libgdbm-compat-dev liblzma-dev \
+            libreadline-dev libffi-dev uuid-dev git curl openjdk-17-jdk zip unzip ccache
+          pip install --upgrade pip
+          pip install --upgrade buildozer cython
+
       - name: APK Derle
         run: |
-          buildozer --warn_on_root=0 android debug
+          yes | buildozer -v android debug
 
       - name: APK Dosyasini Paylas
         uses: actions/upload-artifact@v4
