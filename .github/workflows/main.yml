@@ -35,18 +35,20 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Sistem Bagimliliklarini ve Buildozer'i Kur
+      - name: Sistem Bagimliliklarini ve Autoconf Araclarini Kur
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libsqlite3-dev sqlite3 bzip2 libbz2-dev \
+          sudo apt-get install -y \
+            build-essential libsqlite3-dev sqlite3 bzip2 libbz2-dev \
             zlib1g-dev libssl-dev openssl libgdbm-dev libgdbm-compat-dev liblzma-dev \
-            libreadline-dev libffi-dev uuid-dev git curl openjdk-17-jdk zip unzip ccache
+            libreadline-dev libffi-dev uuid-dev git curl openjdk-17-jdk zip unzip ccache \
+            autoconf automake libtool pkg-config autopoint gettext
           pip install --upgrade pip
           pip install --upgrade buildozer cython
 
       - name: APK Derle
         run: |
-          yes | buildozer -v android debug
+          buildozer -v android debug
 
       - name: APK Dosyasini Paylas
         uses: actions/upload-artifact@v4
