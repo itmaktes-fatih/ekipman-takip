@@ -7,7 +7,7 @@ source.include_exts = py,png,jpg,kv,atlas
 version = 1.0
 
 # Bağımlılıklar
-requirements = python3,kivy,requests,certifi,urllib3,chardet,idna
+requirements = python3,kivy,kivymd,requests,urllib3,chardet,certifi,idna
 
 orientation = portrait
 osx.python_version = 3
