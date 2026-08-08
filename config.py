@@ -15,8 +15,15 @@ APP_VERSION = "2.0.0"
 # --------------------------------------------------
 # FIREBASE
 # --------------------------------------------------
+# Realtime Database REST API kullanılıyor (mobil/Android uyumlu).
+# firebase_admin SDK Android'de ÇALIŞMAZ ve servis hesabı anahtarı
+# telefona gömülemeyeceği için kullanılmamalıdır.
 
 FIREBASE_URL = "https://kacis-seti-takip-default-rtdb.europe-west1.firebasedatabase.app/"
+
+# Realtime Database kurallarınız "auth != null" gerektiriyorsa buraya
+# bir Database Secret / ID token yazabilirsiniz. Test modundaysa boş bırakın.
+FIREBASE_AUTH_TOKEN = ""
 
 # Firebase Node'ları
 NODE_EKIPMANLAR = "ekipmanlar"
@@ -36,7 +43,6 @@ SUCCESS_COLOR = "#2ECC71"
 WARNING_COLOR = "#F1C40F"
 DANGER_COLOR = "#E74C3C"
 
-# Kivy Color
 PRIMARY = get_color_from_hex(PRIMARY_COLOR)
 SECONDARY = get_color_from_hex(SECONDARY_COLOR)
 BACKGROUND = get_color_from_hex(BACKGROUND_COLOR)
