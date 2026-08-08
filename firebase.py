@@ -11,9 +11,12 @@
 
 import requests
 
+import firebase_auth
+
 from config import (
     FIREBASE_URL,
     FIREBASE_AUTH_TOKEN,
+    FIREBASE_WEB_API_KEY,
     NODE_EKIPMANLAR,
     NODE_SORUMLULAR,
 )
@@ -25,14 +28,32 @@ TIMEOUT = 10
 # ORTAK
 # ==========================================================
 
+def _auth_parametresi() -> str:
+    """
+    Öncelik: sabit FIREBASE_AUTH_TOKEN (elle girilmişse) > otomatik
+    anonim Firebase Auth idToken (Web API Key tanımlıysa) > boş
+    (test modu / public rules).
+    """
+
+    if FIREBASE_AUTH_TOKEN:
+        return FIREBASE_AUTH_TOKEN
+
+    if FIREBASE_WEB_API_KEY:
+        return firebase_auth.id_token()
+
+    return ""
+
+
 def _url(node, key=None):
 
     parca = f"{node}/{key}" if key else node
 
     url = f"{FIREBASE_URL.rstrip('/')}/{parca}.json"
 
-    if FIREBASE_AUTH_TOKEN:
-        url += f"?auth={FIREBASE_AUTH_TOKEN}"
+    token = _auth_parametresi()
+
+    if token:
+        url += f"?auth={token}"
 
     return url
 
