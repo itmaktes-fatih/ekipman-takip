@@ -1,4 +1,5 @@
 # ==========================================
+# PERİYODİK KONTROL TAKİP
 # components/istatistik_card.py
 # ==========================================
 
@@ -12,9 +13,6 @@ Builder.load_file("components/istatistik_card.kv")
 class IstatistikCard(MDCard):
 
     icon = StringProperty("information")
-
     title = StringProperty("Başlık")
-
     value = StringProperty("0")
-
     icon_color = StringProperty("#FFFFFF")
