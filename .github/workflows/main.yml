@@ -1,4 +1,4 @@
-ename: Otomatik APK Derleyici
+name: Otomatik APK Derleyici
 
 on:
   push:
