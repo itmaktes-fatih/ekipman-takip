@@ -1,4 +1,3 @@
-```yaml
 name: Otomatik APK Derleyici
 
 on:
@@ -196,4 +195,3 @@ jobs:
             .buildozer/**/*.log
             .buildozer/android/platform/**/*.log
           if-no-files-found: warn
-```
