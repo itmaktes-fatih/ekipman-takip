@@ -1,0 +1,49 @@
+<SorumlularScreen>
+
+    MDBoxLayout:
+        orientation: "vertical"
+
+        MDTopAppBar:
+            title: "Sorumlu Kişiler"
+
+            left_action_items:
+                [["arrow-left", lambda x: root.geri()]]
+
+        ScrollView:
+
+            MDBoxLayout:
+                orientation: "vertical"
+                adaptive_height: True
+                spacing: "15dp"
+                padding: "15dp"
+
+                MDTextField:
+                    id: txt_ad
+                    hint_text: "Ad Soyad"
+                    mode: "outlined"
+
+                MDTextField:
+                    id: txt_telefon
+                    hint_text: "Telefon"
+                    mode: "outlined"
+
+                MDTextField:
+                    id: txt_email
+                    hint_text: "E-posta"
+                    mode: "outlined"
+
+                MDRaisedButton:
+                    text: "Ekle"
+                    pos_hint: {"center_x": .5}
+                    on_release: root.kaydet()
+
+                MDLabel:
+                    text: "Kayıtlı Sorumlular"
+                    bold: True
+                    font_style: "TitleLarge"
+
+                MDBoxLayout:
+                    id: liste
+                    orientation: "vertical"
+                    adaptive_height: True
+                    spacing: "10dp"
