@@ -1,90 +1,79 @@
 # ==========================================
 # PERİYODİK KONTROL TAKİP
 # firebase.py
+#
+# NOT: Orijinal dosyada firebase_admin (sunucu SDK'sı) kullanılıyordu.
+# Bu, Android/buildozer ortamında ÇALIŞMAZ ve servis hesabı JSON
+# anahtarını telefona gömmeyi gerektirirdi (güvenlik riski).
+# Bunun yerine buildozer.spec'te zaten bulunan "requests" kütüphanesi
+# ile Firebase Realtime Database REST API kullanılıyor.
 # ==========================================
 
-import firebase_admin
-
-from firebase_admin import credentials
-from firebase_admin import db
+import requests
 
 from config import (
-    FIREBASE_CREDENTIAL_PATH,
-    FIREBASE_DATABASE_URL
+    FIREBASE_URL,
+    FIREBASE_AUTH_TOKEN,
+    NODE_EKIPMANLAR,
+    NODE_SORUMLULAR,
 )
 
-# ==========================================================
-# BAĞLANTI
-# ==========================================================
-
-if not firebase_admin._apps:
-
-    cred = credentials.Certificate(
-        FIREBASE_CREDENTIAL_PATH
-    )
-
-    firebase_admin.initialize_app(
-
-        cred,
-
-        {
-            "databaseURL": FIREBASE_DATABASE_URL
-        }
-
-    )
-
-# ==========================================================
-# ROOT
-# ==========================================================
-
-ROOT = db.reference()
-
-EKIPMAN_REF = ROOT.child("ekipmanlar")
-
-SORUMLU_REF = ROOT.child("sorumlular")
+TIMEOUT = 10
 
 
 # ==========================================================
 # ORTAK
 # ==========================================================
 
-def _get(ref):
+def _url(node, key=None):
 
-    data = ref.get()
+    parca = f"{node}/{key}" if key else node
 
-    return data if data else {}
+    url = f"{FIREBASE_URL.rstrip('/')}/{parca}.json"
 
+    if FIREBASE_AUTH_TOKEN:
+        url += f"?auth={FIREBASE_AUTH_TOKEN}"
 
-def _push(ref, value):
-
-    yeni = ref.push()
-
-    yeni.set(value)
-
-    return yeni.key
+    return url
 
 
-def _update(ref, key, value):
+def _get(node):
 
-    ref.child(key).update(value)
+    try:
+        r = requests.get(_url(node), timeout=TIMEOUT)
+        r.raise_for_status()
+        data = r.json()
+        return data if data else {}
+
+    except requests.RequestException:
+        return {}
 
 
-def _set(ref, key, value):
+def _push(node, value):
 
-    ref.child(key).set(value)
+    try:
+        r = requests.post(_url(node), json=value, timeout=TIMEOUT)
+        r.raise_for_status()
+        return r.json().get("name")
+
+    except requests.RequestException:
+        return None
 
 
-def _pasif_yap(ref, key):
+def _update(node, key, value):
 
-    ref.child(key).update(
+    try:
+        r = requests.patch(_url(node, key), json=value, timeout=TIMEOUT)
+        r.raise_for_status()
+        return True
 
-        {
+    except requests.RequestException:
+        return False
 
-            "aktif": False
 
-        }
+def _pasif_yap(node, key):
 
-    )
+    return _update(node, key, {"aktif": False})
 
 
 # ==========================================================
@@ -92,49 +81,19 @@ def _pasif_yap(ref, key):
 # ==========================================================
 
 def ekipmanlari_getir():
-
-    return _get(EKIPMAN_REF)
+    return _get(NODE_EKIPMANLAR)
 
 
 def ekipman_ekle(data: dict):
-
-    return _push(
-
-        EKIPMAN_REF,
-
-        data
-
-    )
+    return _push(NODE_EKIPMANLAR, data)
 
 
-def ekipman_guncelle(
-
-        firebase_key,
-
-        data: dict
-
-):
-
-    _update(
-
-        EKIPMAN_REF,
-
-        firebase_key,
-
-        data
-
-    )
+def ekipman_guncelle(firebase_key, data: dict):
+    return _update(NODE_EKIPMANLAR, firebase_key, data)
 
 
 def ekipman_pasif_yap(firebase_key):
-
-    _pasif_yap(
-
-        EKIPMAN_REF,
-
-        firebase_key
-
-    )
+    return _pasif_yap(NODE_EKIPMANLAR, firebase_key)
 
 
 # ==========================================================
@@ -142,50 +101,20 @@ def ekipman_pasif_yap(firebase_key):
 # ==========================================================
 
 def sorumlulari_getir():
-
-    return _get(
-
-        SORUMLU_REF
-
-    )
+    return _get(NODE_SORUMLULAR)
 
 
 def sorumlu_ekle(data: dict):
-
-    return _push(
-
-        SORUMLU_REF,
-
-        data
-
-    )
+    return _push(NODE_SORUMLULAR, data)
 
 
-def sorumlu_guncelle(
-
-        firebase_key,
-
-        data: dict
-
-):
-
-    _update(
-
-        SORUMLU_REF,
-
-        firebase_key,
-
-        data
-
-    )
+def sorumlu_guncelle(firebase_key, data: dict):
+    return _update(NODE_SORUMLULAR, firebase_key, data)
 
 
 def sorumlu_pasif_yap(firebase_key):
+    return _pasif_yap(NODE_SORUMLULAR, firebase_key)
 
-    _pasif_yap(
 
-        SORUMLU_REF,
-
-        firebase_key
-
-    )
+# Eski isimlerle uyumluluk (form ekranı bu isimlerle çağırıyordu)
+get_sorumlular = sorumlulari_getir
