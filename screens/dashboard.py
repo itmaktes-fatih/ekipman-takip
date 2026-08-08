@@ -1,3 +1,8 @@
+# ==========================================
+# PERİYODİK KONTROL TAKİP
+# screens/dashboard.py
+# ==========================================
+
 from kivy.lang import Builder
 from kivy.clock import Clock
 
@@ -22,9 +27,7 @@ class DashboardScreen(MDScreen):
         self.ids.yaklasan_card.value = str(veri["yaklasan"])
         self.ids.gecmis_card.value = str(veri["gecmis"])
 
-        self.yaklasanlari_goster(
-            veri["yaklasan_liste"]
-        )
+        self.yaklasanlari_goster(veri["yaklasan_liste"])
 
     def yaklasanlari_goster(self, liste):
 
@@ -36,11 +39,8 @@ class DashboardScreen(MDScreen):
             return
 
         for ekipman in liste:
-
             kart = EkipmanCard()
-
-            kart.ekipman = ekipman
-
+            kart.set_data(ekipman)
             self.ids.yaklasan_liste.add_widget(kart)
 
     def ekipmanlar(self):
