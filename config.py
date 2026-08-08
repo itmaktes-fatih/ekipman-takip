@@ -19,7 +19,7 @@ APP_VERSION = "2.0.0"
 # firebase_admin SDK Android'de ÇALIŞMAZ ve servis hesabı anahtarı
 # telefona gömülemeyeceği için kullanılmamalıdır.
 
-FIREBASE_URL = "https://kacis-seti-takip-default-rtdb.europe-west1.firebasedatabase.app/"
+FIREBASE_URL = "https://ekipman-takip-default-rtdb.europe-west1.firebasedatabase.app/"
 
 # Realtime Database kurallarınız "auth != null" gerektiriyorsa buraya
 # bir Database Secret / ID token yazabilirsiniz. Test modundaysa boş bırakın.
