@@ -1,4 +1,4 @@
-name: Otomatik APK Derleyici
+ename: Otomatik APK Derleyici
 
 on:
   push:
@@ -38,9 +38,9 @@ jobs:
             ffmpeg \
             libsdl2-dev \
             libsdl2-image-dev \
-            libsdl2-mixin-dev \
+            libsdl2-mixer-dev \
             libsdl2-ttf-dev \
-            portmidi-dev \
+            libportmidi-dev \
             libswscale-dev \
             libavformat-dev \
             libavcodec-dev \
