@@ -21,8 +21,15 @@ APP_VERSION = "2.0.0"
 
 FIREBASE_URL = "https://ekipman-takip-default-rtdb.europe-west1.firebasedatabase.app/"
 
-# Realtime Database kurallarınız "auth != null" gerektiriyorsa buraya
-# bir Database Secret / ID token yazabilirsiniz. Test modundaysa boş bırakın.
+# Realtime Database "locked mode" (auth != null) çalışıyorsa, uygulama
+# firebase_auth.py aracılığıyla otomatik anonim oturum açar. Bunun için
+# Firebase Console > Proje Ayarları > General > "Web API Key" değerini
+# buraya yazın. Anonymous Sign-in'i Authentication > Sign-in method'dan
+# etkinleştirmeyi unutmayın. Bu anahtar gizli değildir, güvenlik veritabanı
+# kurallarıyla sağlanır.
+FIREBASE_WEB_API_KEY = "AIzaSyCagCcT4s8eroqlM5vkEom0TntzTQcUzns"
+
+# Database test modundaysa (herkese açık okuma/yazma) bu boş kalabilir.
 FIREBASE_AUTH_TOKEN = ""
 
 # Firebase Node'ları
