@@ -1,18 +1,31 @@
+```yaml
 name: Otomatik APK Derleyici
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches:
+      - "main"
+      - "master"
+
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    name: Android APK Build
+    runs-on: ubuntu-22.04
 
     steps:
+
+      # ---------------------------------------------------------
+      # 1. Kodu GitHub'dan çek
+      # ---------------------------------------------------------
       - name: Repodaki Kodu Cek
         uses: actions/checkout@v4
 
+
+      # ---------------------------------------------------------
+      # 2. Disk alanını temizle
+      # ---------------------------------------------------------
       - name: Disk Alanini Temizle
         uses: jlumbroso/free-disk-space@main
         with:
@@ -24,34 +37,163 @@ jobs:
           docker-images: true
           swap-storage: true
 
+
+      # ---------------------------------------------------------
+      # 3. Python
+      # ---------------------------------------------------------
       - name: Python 3.10 Kur
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.10"
+          cache: "pip"
 
+
+      # ---------------------------------------------------------
+      # 4. Java 17
+      # ---------------------------------------------------------
       - name: JDK 17 Kur
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: "temurin"
+          java-version: "17"
+          cache: "gradle"
 
-      - name: Sistem Bagimliliklarini ve Autoconf Araclarini Kur
+
+      # ---------------------------------------------------------
+      # 5. Sistem bağımlılıkları
+      # ---------------------------------------------------------
+      - name: Sistem Bagimliliklarini Kur
         run: |
           sudo apt-get update
+
           sudo apt-get install -y \
-            build-essential libsqlite3-dev sqlite3 bzip2 libbz2-dev \
-            zlib1g-dev libssl-dev openssl libgdbm-dev libgdbm-compat-dev liblzma-dev \
-            libreadline-dev libffi-dev uuid-dev git curl openjdk-17-jdk zip unzip ccache \
-            autoconf automake libtool pkg-config autopoint gettext
-          pip install --upgrade pip
-          pip install --upgrade buildozer cython
+            build-essential \
+            git \
+            zip \
+            unzip \
+            curl \
+            wget \
+            ccache \
+            autoconf \
+            automake \
+            libtool \
+            pkg-config \
+            autopoint \
+            gettext \
+            cmake \
+            libffi-dev \
+            libssl-dev \
+            libsqlite3-dev \
+            sqlite3 \
+            zlib1g-dev \
+            libbz2-dev \
+            liblzma-dev \
+            libreadline-dev \
+            libgdbm-dev \
+            libgdbm-compat-dev \
+            uuid-dev
 
-      - name: APK Derle
+
+      # ---------------------------------------------------------
+      # 6. Python build araçları
+      # ---------------------------------------------------------
+      - name: Python Build Araclarini Kur
         run: |
-          buildozer -v android debug
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install --upgrade virtualenv
+          python -m pip install --upgrade cython
+          python -m pip install --upgrade buildozer
 
+
+      # ---------------------------------------------------------
+      # 7. Java ortamını kontrol et
+      # ---------------------------------------------------------
+      - name: Java Ortamini Kontrol Et
+        run: |
+          echo "JAVA_HOME=$JAVA_HOME"
+          java -version
+          javac -version
+
+
+      # ---------------------------------------------------------
+      # 8. Buildozer ortamını kontrol et
+      # ---------------------------------------------------------
+      - name: Buildozer Kontrol
+        run: |
+          buildozer --version
+          python --version
+          pip --version
+
+
+      # ---------------------------------------------------------
+      # 9. Buildozer cache
+      # ---------------------------------------------------------
+      - name: Buildozer Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .buildozer
+            ~/.buildozer
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
+          restore-keys: |
+            ${{ runner.os }}-buildozer-
+
+
+      # ---------------------------------------------------------
+      # 10. APK Derle
+      # ---------------------------------------------------------
+      - name: APK Derle
+        env:
+          JAVA_HOME: ${{ env.JAVA_HOME }}
+        run: |
+          yes | buildozer -v android debug
+
+
+      # ---------------------------------------------------------
+      # 11. APK kontrolü
+      # ---------------------------------------------------------
+      - name: APK Dosyasini Kontrol Et
+        run: |
+          echo "======================================"
+          echo "APK DOSYALARI"
+          echo "======================================"
+
+          ls -lah bin/ || true
+
+          APK_COUNT=$(find bin -maxdepth 1 -type f -name "*.apk" | wc -l)
+
+          if [ "$APK_COUNT" -eq 0 ]; then
+            echo "HATA: APK olusturulamadi!"
+            exit 1
+          fi
+
+          echo "APK basariyla olusturuldu."
+          find bin -maxdepth 1 -type f -name "*.apk" -print
+
+
+      # ---------------------------------------------------------
+      # 12. APK'yı GitHub Artifact olarak yükle
+      # ---------------------------------------------------------
       - name: APK Dosyasini Paylas
         uses: actions/upload-artifact@v4
         with:
           name: Ekipman_Periyodik_Kontrol_Takibi_APK
           path: bin/*.apk
+          if-no-files-found: error
+
+
+      # ---------------------------------------------------------
+      # 13. Build loglarını sakla
+      # ---------------------------------------------------------
+      - name: Build Loglarini Paylas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build_Loglari
+          path: |
+            .buildozer/**/*.log
+            .buildozer/android/platform/**/*.log
+          if-no-files-found: warn
+```
