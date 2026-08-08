@@ -5,6 +5,9 @@ from kivy.core.window import Window
 from config import APP_NAME
 
 from screens.dashboard import DashboardScreen
+from screens.ekipman_listesi import EkipmanListesiScreen
+from screens.ekipman_formu import EkipmanFormuScreen
+from screens.sorumlular import SorumlularScreen
 
 
 class AppManager(ScreenManager):
@@ -28,6 +31,9 @@ class PeriyodikKontrolApp(MDApp):
         )
 
         sm.add_widget(DashboardScreen(name="dashboard"))
+        sm.add_widget(EkipmanListesiScreen(name="ekipman_listesi"))
+        sm.add_widget(EkipmanFormuScreen(name="ekipman_formu"))
+        sm.add_widget(SorumlularScreen(name="sorumlular"))
 
         return sm
 
