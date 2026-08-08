@@ -1,0 +1,69 @@
+<EkipmanFormuScreen>
+
+    MDBoxLayout:
+        orientation: "vertical"
+
+        MDTopAppBar:
+            title: "Yeni Ekipman"
+
+            left_action_items:
+                [["arrow-left", lambda x: root.geri()]]
+
+        ScrollView:
+
+            MDBoxLayout:
+                orientation: "vertical"
+                adaptive_height: True
+                spacing: "12dp"
+                padding: "15dp"
+
+                MDTextField:
+                    id: txt_ad
+                    hint_text: "Ekipman Adı"
+                    mode: "outlined"
+
+                MDTextField:
+                    id: txt_id
+                    hint_text: "Ekipman ID"
+                    mode: "outlined"
+
+                MDTextField:
+                    id: txt_tarih
+                    hint_text: "Son Kontrol Tarihi (GG.AA.YYYY)"
+                    mode: "outlined"
+                    on_text: root.tarih_degisti()
+
+                MDTextField:
+                    id: txt_periyot
+                    hint_text: "Periyot (gün)"
+                    mode: "outlined"
+                    input_filter: "int"
+                    on_text: root.tarih_degisti()
+
+                MDLabel:
+                    text: "Sonraki Kontrol:"
+                    theme_text_color: "Secondary"
+
+                MDLabel:
+                    id: lbl_sonraki
+                    text: "-"
+                    bold: True
+
+                MDBoxLayout:
+                    orientation: "vertical"
+                    adaptive_height: True
+
+                    MDLabel:
+                        text: "Sorumlu"
+                        theme_text_color: "Secondary"
+
+                    Spinner:
+                        id: cmb_sorumlu
+                        text: "Seçiniz"
+                        size_hint_y: None
+                        height: "48dp"
+
+                MDRaisedButton:
+                    text: "Kaydet"
+                    pos_hint: {"center_x": .5}
+                    on_release: root.kaydet()
