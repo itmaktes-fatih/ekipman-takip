@@ -2,68 +2,144 @@ name: Otomatik APK Derleyici
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches:
+      - "main"
+      - "master"
+
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    name: Android APK Build
+    runs-on: ubuntu-22.04
 
     steps:
-      - name: Repositoriyi Klonla
+
+      - name: Repodaki Kodu Cek
         uses: actions/checkout@v4
 
-      - name: Python Kurulumu
+      - name: Disk Alanini Temizle
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      - name: Python 3.10 Kur
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.10"
+          cache: "pip"
 
-      - name: Disk Alanini Temizle
-        run: |
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /opt/ghc
-          sudo rm -rf "/usr/local/share/boost"
-          sudo apt-get clean
+      - name: JDK 17 Kur
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
 
       - name: Sistem Bagimliliklarini Kur
         run: |
           sudo apt-get update
+
           sudo apt-get install -y \
-            python3-pip \
-            python3-setuptools \
-            python3-venv \
             build-essential \
             git \
-            ffmpeg \
-            libsdl2-dev \
-            libsdl2-image-dev \
-            libsdl2-mixer-dev \
-            libsdl2-ttf-dev \
-            libportmidi-dev \
-            libswscale-dev \
-            libavformat-dev \
-            libavcodec-dev \
-            zlib1g-dev \
-            libgstreamer1.0-dev \
-            gstreamer1.0-plugins-base \
-            gstreamer1.0-plugins-good \
-            ccache \
             zip \
             unzip \
-            openjdk-17-jdk
+            curl \
+            wget \
+            ccache \
+            autoconf \
+            automake \
+            libtool \
+            pkg-config \
+            autopoint \
+            gettext \
+            cmake \
+            libffi-dev \
+            libssl-dev \
+            libsqlite3-dev \
+            sqlite3 \
+            zlib1g-dev \
+            libbz2-dev \
+            liblzma-dev \
+            libreadline-dev \
+            libgdbm-dev \
+            libgdbm-compat-dev \
+            uuid-dev
 
       - name: Python Build Araclarini Kur
         run: |
-          python3 -m pip install --upgrade pip setuptools wheel --break-system-packages
-          python3 -m pip install "cython<3.0.0" buildozer --break-system-packages
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install --upgrade virtualenv
+          python -m pip install --upgrade cython
+          python -m pip install --upgrade buildozer
 
-      - name: APK Derle (Buildozer)
+      - name: Java Ortamini Kontrol Et
+        run: |
+          echo "JAVA_HOME=$JAVA_HOME"
+          java -version
+          javac -version
+
+      - name: Buildozer Kontrol
+        run: |
+          buildozer --version
+          python --version
+          pip --version
+
+      - name: Buildozer Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .buildozer
+            ~/.buildozer
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
+          restore-keys: |
+            ${{ runner.os }}-buildozer-
+
+      - name: APK Derle
+        env:
+          JAVA_HOME: ${{ env.JAVA_HOME }}
         run: |
           yes | buildozer -v android debug
 
-      - name: APK Dosyasini Artifact Olarak Yukle
+      - name: APK Dosyasini Kontrol Et
+        run: |
+          echo "======================================"
+          echo "APK DOSYALARI"
+          echo "======================================"
+
+          ls -lah bin/ || true
+
+          APK_COUNT=$(find bin -maxdepth 1 -type f -name "*.apk" | wc -l)
+
+          if [ "$APK_COUNT" -eq 0 ]; then
+            echo "HATA: APK olusturulamadi!"
+            exit 1
+          fi
+
+          echo "APK basariyla olusturuldu."
+          find bin -maxdepth 1 -type f -name "*.apk" -print
+
+      - name: APK Dosyasini Paylas
         uses: actions/upload-artifact@v4
         with:
-          name: python-app-apk
+          name: Ekipman_Periyodik_Kontrol_Takibi_APK
           path: bin/*.apk
+          if-no-files-found: error
+
+      - name: Build Loglarini Paylas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build_Loglari
+          path: |
+            .buildozer/**/*.log
+            .buildozer/android/platform/**/*.log
+          if-no-files-found: warn
