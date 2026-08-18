@@ -7,8 +7,7 @@ from kivy.lang import Builder
 from kivy.clock import Clock
 
 from kivymd.uix.screen import MDScreen
-from kivymd.uix.snackbar import MDSnackbar
-from kivymd.uix.snackbar import MDSnackbarText
+from kivymd.uix.snackbar import Snackbar
 
 import firebase
 import utils
@@ -71,17 +70,13 @@ class EkipmanFormuScreen(MDScreen):
 
         if firebase.ekipman_ekle(veri):
 
-            MDSnackbar(
-                MDSnackbarText(text="Kayıt başarıyla oluşturuldu.")
-            ).open()
+            Snackbar(text="Kayıt başarıyla oluşturuldu.").open()
 
             self.temizle()
 
         else:
 
-            MDSnackbar(
-                MDSnackbarText(text="Kayıt oluşturulamadı.")
-            ).open()
+            Snackbar(text="Kayıt oluşturulamadı.").open()
 
     def temizle(self):
 
