@@ -1,69 +1,41 @@
-<EkipmanFormuScreen>
+<EkipmanListesiScreen>
 
     MDBoxLayout:
+
         orientation: "vertical"
 
         MDTopAppBar:
-            title: "Yeni Ekipman"
+
+            title: "Ekipmanlar"
 
             left_action_items:
                 [["arrow-left", lambda x: root.geri()]]
 
+        MDTextField:
+
+            hint_text: "Ara..."
+            mode: "rectangle"
+
+            on_text:
+                root.ara(self.text)
+
         ScrollView:
 
             MDBoxLayout:
+
+                id: liste
+
                 orientation: "vertical"
                 adaptive_height: True
-                spacing: "12dp"
-                padding: "15dp"
+                spacing: "10dp"
+                padding: "10dp"
 
-                MDTextField:
-                    id: txt_ad
-                    hint_text: "Ekipman Adı"
-                    mode: "rectangle"
+        MDFloatingActionButton:
 
-                MDTextField:
-                    id: txt_id
-                    hint_text: "Ekipman ID"
-                    mode: "rectangle"
+            icon: "plus"
 
-                MDTextField:
-                    id: txt_tarih
-                    hint_text: "Son Kontrol Tarihi (GG.AA.YYYY)"
-                    mode: "rectangle"
-                    on_text: root.tarih_degisti()
+            pos_hint:
+                {"right": .95, "y": .03}
 
-                MDTextField:
-                    id: txt_periyot
-                    hint_text: "Periyot (gün)"
-                    mode: "rectangle"
-                    input_filter: "int"
-                    on_text: root.tarih_degisti()
-
-                MDLabel:
-                    text: "Sonraki Kontrol:"
-                    theme_text_color: "Secondary"
-
-                MDLabel:
-                    id: lbl_sonraki
-                    text: "-"
-                    bold: True
-
-                MDBoxLayout:
-                    orientation: "vertical"
-                    adaptive_height: True
-
-                    MDLabel:
-                        text: "Sorumlu"
-                        theme_text_color: "Secondary"
-
-                    Spinner:
-                        id: cmb_sorumlu
-                        text: "Seçiniz"
-                        size_hint_y: None
-                        height: "48dp"
-
-                MDRaisedButton:
-                    text: "Kaydet"
-                    pos_hint: {"center_x": .5}
-                    on_release: root.kaydet()
+            on_release:
+                root.yeni_ekipman()
