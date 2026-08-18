@@ -52,11 +52,15 @@
                 MDLabel:
                     text: "Menü"
                     bold: True
-                    font_style: "TitleLarge"
+                    font_style: "H6"
+                    size_hint_y: None
+                    height: self.texture_size[1]
 
                 MDCard:
                     ripple_behavior: True
                     on_release: root.ekipmanlar()
+                    size_hint_y: None
+                    height: "70dp"
 
                     MDBoxLayout:
                         padding: "15dp"
@@ -71,6 +75,8 @@
                 MDCard:
                     ripple_behavior: True
                     on_release: root.sorumlular()
+                    size_hint_y: None
+                    height: "70dp"
 
                     MDBoxLayout:
                         padding: "15dp"
@@ -85,7 +91,9 @@
                 MDLabel:
                     text: "Yaklaşan Kontroller"
                     bold: True
-                    font_style: "TitleLarge"
+                    font_style: "H6"
+                    size_hint_y: None
+                    height: self.texture_size[1]
 
                 MDBoxLayout:
                     id: yaklasan_liste
