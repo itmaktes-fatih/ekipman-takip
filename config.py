@@ -32,11 +32,6 @@ FIREBASE_WEB_API_KEY = "AIzaSyCagCcT4s8eroqlM5vkEom0TntzTQcUzns"
 # Database test modundaysa (herkese açık okuma/yazma) bu boş kalabilir.
 FIREBASE_AUTH_TOKEN = ""
 
-class FirebaseConfig:
-    DATABASE_URL = FIREBASE_URL
-    WEB_API_KEY = FIREBASE_WEB_API_KEY
-    AUTH_TOKEN = FIREBASE_AUTH_TOKEN
-
 # Firebase Node'ları
 NODE_EKIPMANLAR = "ekipmanlar"
 NODE_SORUMLULAR = "sorumlular"
