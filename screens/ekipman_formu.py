@@ -49,42 +49,113 @@ class EkipmanFormuScreen(MDScreen):
 
     def kaydet(self):
 
-        if self.ids.txt_ad.text == "":
-            return
+        try:
 
-        if self.ids.txt_id.text == "":
-            return
+            # -----------------------------
+            # ZORUNLU ALAN KONTROLLERİ
+            # -----------------------------
 
-        if not utils.tarih_dogrula(self.ids.txt_tarih.text):
-            return
+            ad = self.ids.txt_ad.text.strip()
+            ekipman_id = self.ids.txt_id.text.strip()
+            tarih = self.ids.txt_tarih.text.strip()
+            periyot_text = self.ids.txt_periyot.text.strip()
+            sorumlu_ad = self.ids.cmb_sorumlu.text.strip()
 
-        sorumlu_id = SorumluService.id_bul(self.ids.cmb_sorumlu.text)
+            if not ad:
+                Snackbar(text="Ekipman adı giriniz.").open()
+                return
 
-        veri = utils.ekipman_olustur(
-            self.ids.txt_ad.text,
-            self.ids.txt_id.text,
-            self.ids.txt_tarih.text,
-            int(self.ids.txt_periyot.text),
-            sorumlu_id,
-        )
+            if not ekipman_id:
+                Snackbar(text="Ekipman ID giriniz.").open()
+                return
 
-        if firebase.ekipman_ekle(veri):
+            if not tarih or not utils.tarih_dogrula(tarih):
+                Snackbar(text="Geçerli bir tarih giriniz.").open()
+                return
 
-            Snackbar(text="Kayıt başarıyla oluşturuldu.").open()
+            if not periyot_text:
+                Snackbar(text="Periyot giriniz.").open()
+                return
+
+            try:
+                periyot = int(periyot_text)
+            except ValueError:
+                Snackbar(text="Periyot sayı olmalıdır.").open()
+                return
+
+            if periyot <= 0:
+                Snackbar(text="Periyot 0'dan büyük olmalıdır.").open()
+                return
+
+            # -----------------------------
+            # SORUMLU BUL
+            # -----------------------------
+
+            sorumlu_id = ""
+
+            if sorumlu_ad and sorumlu_ad != "Seçiniz":
+                sorumlu_id = SorumluService.id_bul(sorumlu_ad)
+
+            # -----------------------------
+            # VERİ OLUŞTUR
+            # -----------------------------
+
+            veri = utils.ekipman_olustur(
+                ad,
+                ekipman_id,
+                tarih,
+                periyot,
+                sorumlu_id,
+            )
+
+            # -----------------------------
+            # FIREBASE KAYDI
+            # -----------------------------
+
+            firebase_key = firebase.ekipman_ekle(veri)
+
+            if not firebase_key:
+                Snackbar(text="Kayıt oluşturulamadı.").open()
+                return
+
+            # -----------------------------
+            # FORM TEMİZLE
+            # -----------------------------
 
             self.temizle()
 
-        else:
+            # -----------------------------
+            # BAŞARI MESAJI
+            # -----------------------------
 
-            Snackbar(text="Kayıt oluşturulamadı.").open()
+            Snackbar(
+                text="Ekipman başarıyla kaydedildi.",
+                duration=2,
+            ).open()
 
+        except Exception as e:
+
+            print("===================================")
+            print("EKİPMAN KAYIT HATASI")
+            print(type(e).__name__)
+            print(str(e))
+            print("===================================")
+
+            try:
+                Snackbar(
+                    text=f"Kayıt sırasında hata: {e}",
+                    duration=3,
+                ).open()
+            except Exception:
+                pass
+                
     def temizle(self):
 
         self.ids.txt_ad.text = ""
         self.ids.txt_id.text = ""
         self.ids.txt_tarih.text = ""
         self.ids.txt_periyot.text = ""
-        self.ids.cmb_sorumlu.text = ""
+        self.ids.cmb_sorumlu.text = "Seçiniz"
         self.ids.lbl_sonraki.text = "-"
 
     def geri(self):
