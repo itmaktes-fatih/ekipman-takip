@@ -7,8 +7,7 @@ from kivy.lang import Builder
 from kivy.clock import Clock
 
 from kivymd.uix.screen import MDScreen
-from kivymd.uix.snackbar import MDSnackbar
-from kivymd.uix.snackbar import MDSnackbarText
+from kivymd.uix.snackbar import Snackbar
 
 from models import Sorumlu
 from services.sorumlu_service import SorumluService
@@ -39,7 +38,7 @@ class SorumlularScreen(MDScreen):
             )
 
             card.add_widget(
-                MDLabel(text=sorumlu.ad, bold=True, font_style="TitleMedium")
+                MDLabel(text=sorumlu.ad, bold=True, font_style="Subtitle1")
             )
             card.add_widget(MDLabel(text=sorumlu.telefon or "-"))
             card.add_widget(MDLabel(text=sorumlu.email or "-"))
@@ -59,9 +58,7 @@ class SorumlularScreen(MDScreen):
 
         if SorumluService.ekle(sorumlu):
 
-            MDSnackbar(
-                MDSnackbarText(text="Sorumlu eklendi.")
-            ).open()
+            Snackbar(text="Sorumlu eklendi.").open()
 
             self.ids.txt_ad.text = ""
             self.ids.txt_telefon.text = ""
@@ -71,9 +68,7 @@ class SorumlularScreen(MDScreen):
 
         else:
 
-            MDSnackbar(
-                MDSnackbarText(text="Sorumlu eklenemedi.")
-            ).open()
+            Snackbar(text="Sorumlu eklenemedi.").open()
 
     def geri(self):
         self.manager.current = "dashboard"
