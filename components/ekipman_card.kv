@@ -1,9 +1,9 @@
-<EkipmanCard>
+<EkipmanCard>:
 
     orientation: "vertical"
 
     size_hint_y: None
-    height: "155dp"
+    height: "205dp" if root.actions_visible else "155dp"
 
     padding: "15dp"
 
@@ -32,3 +32,24 @@
         MDLabel:
             id: lbl_durum
             theme_text_color: "Custom"
+
+        Widget:
+            size_hint_y: None
+            height: "2dp"
+
+        MDBoxLayout:
+            size_hint_y: None
+            height: "40dp" if root.actions_visible else 0
+            spacing: "8dp"
+            opacity: 1 if root.actions_visible else 0
+            disabled: not root.actions_visible
+
+            MDFlatButton:
+                text: "DÜZENLE"
+                on_release: root.duzenle()
+
+            MDFlatButton:
+                text: "PASİFE AL"
+                theme_text_color: "Custom"
+                text_color: 0.95, 0.35, 0.25, 1
+                on_release: root.pasif_yap()
