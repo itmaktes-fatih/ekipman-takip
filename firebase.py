@@ -1,12 +1,9 @@
 # ==========================================
 # PERİYODİK KONTROL TAKİP
 # firebase.py
-#
-# NOT: Orijinal dosyada firebase_admin (sunucu SDK'sı) kullanılıyordu.
-# Bu, Android/buildozer ortamında ÇALIŞMAZ ve servis hesabı JSON
-# anahtarını telefona gömmeyi gerektirirdi (güvenlik riski).
-# Bunun yerine buildozer.spec'te zaten bulunan "requests" kütüphanesi
-# ile Firebase Realtime Database REST API kullanılıyor.
+# ==========================================
+# Firebase Realtime Database REST API.
+# Android/buildozer uyumlu olacak şekilde firebase_admin kullanılmaz.
 # ==========================================
 
 import requests
@@ -29,11 +26,7 @@ TIMEOUT = 10
 # ==========================================================
 
 def _auth_parametresi() -> str:
-    """
-    Öncelik: sabit FIREBASE_AUTH_TOKEN (elle girilmişse) > otomatik
-    anonim Firebase Auth idToken (Web API Key tanımlıysa) > boş
-    (test modu / public rules).
-    """
+    """Firebase REST istekleri için kullanılacak auth token'ını döndürür."""
 
     if FIREBASE_AUTH_TOKEN:
         return FIREBASE_AUTH_TOKEN
@@ -45,13 +38,10 @@ def _auth_parametresi() -> str:
 
 
 def _url(node, key=None):
-
     parca = f"{node}/{key}" if key else node
-
     url = f"{FIREBASE_URL.rstrip('/')}/{parca}.json"
 
     token = _auth_parametresi()
-
     if token:
         url += f"?auth={token}"
 
@@ -59,55 +49,61 @@ def _url(node, key=None):
 
 
 def _get(node):
-
     try:
         r = requests.get(_url(node), timeout=TIMEOUT)
         r.raise_for_status()
         data = r.json()
-        return data if data else {}
+        return data if isinstance(data, dict) else {}
 
-    except requests.RequestException:
+    except Exception as e:
+        print("Firebase GET HATASI:", type(e).__name__, str(e))
         return {}
 
 
 def _push(node, value):
-
     try:
         r = requests.post(
             _url(node),
             json=value,
             timeout=TIMEOUT,
         )
-
         r.raise_for_status()
 
         data = r.json()
+        if not isinstance(data, dict):
+            return None
 
         return data.get("name")
 
     except Exception as e:
-
-        print("Firebase PUSH HATASI:")
-        print(type(e).__name__)
-        print(str(e))
-
+        print("Firebase PUSH HATASI:", type(e).__name__, str(e))
         return None
 
 
 def _update(node, key, value):
+    if not key:
+        return False
 
     try:
-        r = requests.patch(_url(node, key), json=value, timeout=TIMEOUT)
+        r = requests.patch(
+            _url(node, key),
+            json=value,
+            timeout=TIMEOUT,
+        )
         r.raise_for_status()
         return True
 
-    except requests.RequestException:
+    except Exception as e:
+        print("Firebase PATCH HATASI:", type(e).__name__, str(e))
         return False
 
 
 def _pasif_yap(node, key):
-
     return _update(node, key, {"aktif": False})
+
+
+def _aktif_yap(node, key):
+    return _update(node, key, {"aktif": True})
 
 
 # ==========================================================
@@ -122,12 +118,16 @@ def ekipman_ekle(data: dict):
     return _push(NODE_EKIPMANLAR, data)
 
 
-def ekipman_guncelle(firebase_key, data: dict):
+def ekipman_guncelle(firebase_key: str, data: dict):
     return _update(NODE_EKIPMANLAR, firebase_key, data)
 
 
-def ekipman_pasif_yap(firebase_key):
+def ekipman_pasif_yap(firebase_key: str):
     return _pasif_yap(NODE_EKIPMANLAR, firebase_key)
+
+
+def ekipman_aktif_yap(firebase_key: str):
+    return _aktif_yap(NODE_EKIPMANLAR, firebase_key)
 
 
 # ==========================================================
@@ -150,5 +150,9 @@ def sorumlu_pasif_yap(firebase_key):
     return _pasif_yap(NODE_SORUMLULAR, firebase_key)
 
 
-# Eski isimlerle uyumluluk (form ekranı bu isimlerle çağırıyordu)
+def sorumlu_aktif_yap(firebase_key):
+    return _aktif_yap(NODE_SORUMLULAR, firebase_key)
+
+
+# Eski isimlerle uyumluluk.
 get_sorumlular = sorumlulari_getir
