@@ -4,6 +4,7 @@
 # ==========================================
 
 import firebase
+
 from models import Ekipman
 from config import MAX_WARNING_LIST
 from services.sorumlu_service import SorumluService
@@ -17,17 +18,28 @@ class EkipmanService:
 
     @staticmethod
     def tumunu_getir():
-
         data = firebase.ekipmanlari_getir()
 
-        liste = [
-            Ekipman.from_firebase(key, value)
-            for key, value in data.items()
-            if value.get("aktif", True)
-        ]
+        if not isinstance(data, dict):
+            return []
 
-        for ekipman in liste:
+        liste = []
+
+        for key, value in data.items():
+            if not isinstance(value, dict):
+                continue
+
+            if not value.get("aktif", True):
+                continue
+
+            try:
+                ekipman = Ekipman.from_firebase(key, value)
+            except (TypeError, ValueError) as e:
+                print("Geçersiz ekipman kaydı:", key, e)
+                continue
+
             ekipman.sorumlu = EkipmanService.sorumlu_adi(ekipman)
+            liste.append(ekipman)
 
         return liste
 
@@ -37,14 +49,46 @@ class EkipmanService:
 
     @staticmethod
     def ara(metin: str):
+        metin = (metin or "").lower().strip()
 
-        metin = metin.lower().strip()
+        if not metin:
+            return EkipmanService.tumunu_getir()
 
         return [
-            e for e in EkipmanService.tumunu_getir()
+            e
+            for e in EkipmanService.tumunu_getir()
             if metin in e.ekipman_adi.lower()
             or metin in e.ekipman_id.lower()
+            or metin in e.sorumlu.lower()
         ]
+
+    @staticmethod
+    def ekipman_id_kullaniliyor(ekipman_id: str, haric_key: str = None) -> bool:
+        """Aktif ekipmanlarda ID'nin daha önce kullanılıp kullanılmadığını kontrol eder."""
+
+        hedef = (ekipman_id or "").strip().casefold()
+        if not hedef:
+            return False
+
+        data = firebase.ekipmanlari_getir()
+        if not isinstance(data, dict):
+            return False
+
+        for key, value in data.items():
+            if key == haric_key:
+                continue
+
+            if not isinstance(value, dict):
+                continue
+
+            if not value.get("aktif", True):
+                continue
+
+            mevcut = str(value.get("ekipman_id", "")).strip().casefold()
+            if mevcut == hedef:
+                return True
+
+        return False
 
     # --------------------------------------------------
     # DASHBOARD
@@ -52,7 +96,6 @@ class EkipmanService:
 
     @staticmethod
     def dashboard_verisi() -> dict:
-
         liste = EkipmanService.tumunu_getir()
 
         guvenli = [e for e in liste if e.durum_rengi == "success"]
@@ -86,4 +129,9 @@ class EkipmanService:
 
     @staticmethod
     def sil(firebase_key: str):
+        """Fiziksel silme yapmaz; ekipmanı pasife alır."""
         return firebase.ekipman_pasif_yap(firebase_key)
+
+    @staticmethod
+    def aktiflestir(firebase_key: str):
+        return firebase.ekipman_aktif_yap(firebase_key)
