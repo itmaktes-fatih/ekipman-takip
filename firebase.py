@@ -73,11 +73,24 @@ def _get(node):
 def _push(node, value):
 
     try:
-        r = requests.post(_url(node), json=value, timeout=TIMEOUT)
-        r.raise_for_status()
-        return r.json().get("name")
+        r = requests.post(
+            _url(node),
+            json=value,
+            timeout=TIMEOUT,
+        )
 
-    except requests.RequestException:
+        r.raise_for_status()
+
+        data = r.json()
+
+        return data.get("name")
+
+    except Exception as e:
+
+        print("Firebase PUSH HATASI:")
+        print(type(e).__name__)
+        print(str(e))
+
         return None
 
 
