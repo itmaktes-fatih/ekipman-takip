@@ -12,6 +12,8 @@ source.include_exts = py,png,jpg,jpeg,kv,atlas
 version = 1.0.0
 
 icon.filename = %(source.dir)s/assets/icon.png
+icon.adaptive_foreground.filename = %(source.dir)s/assets/icon_fg.png
+icon.adaptive_background.filename = %(source.dir)s/assets/icon_bg.png
 
 presplash.filename = %(source.dir)s/assets/presplash.png
 android.presplash_color = #017CBF
