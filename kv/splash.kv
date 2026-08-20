@@ -1,0 +1,29 @@
+<SplashScreen>
+
+    MDBoxLayout:
+        orientation: "vertical"
+        md_bg_color: 0.004, 0.486, 0.749, 1
+
+        Widget:
+
+        Image:
+            source: "assets/mimas_logo.png"
+            size_hint: None, None
+            size: "280dp", "118dp"
+            pos_hint: {"center_x": 0.5}
+
+        Widget:
+            size_hint_y: None
+            height: "20dp"
+
+        MDLabel:
+            text: "Ekipman Takip Sistemi"
+            halign: "center"
+            bold: True
+            font_style: "H6"
+            theme_text_color: "Custom"
+            text_color: 1, 1, 1, 1
+            size_hint_y: None
+            height: self.texture_size[1]
+
+        Widget:
