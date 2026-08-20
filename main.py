@@ -4,6 +4,7 @@ from kivy.core.window import Window
 
 from config import APP_NAME
 
+from screens.splash import SplashScreen
 from screens.dashboard import DashboardScreen
 from screens.ekipman_listesi import EkipmanListesiScreen
 from screens.ekipman_formu import EkipmanFormuScreen
@@ -30,10 +31,13 @@ class PeriyodikKontrolApp(MDApp):
             transition=FadeTransition(duration=0.20)
         )
 
+        sm.add_widget(SplashScreen(name="splash"))
         sm.add_widget(DashboardScreen(name="dashboard"))
         sm.add_widget(EkipmanListesiScreen(name="ekipman_listesi"))
         sm.add_widget(EkipmanFormuScreen(name="ekipman_formu"))
         sm.add_widget(SorumlularScreen(name="sorumlular"))
+
+        sm.current = "splash"
 
         return sm
 
