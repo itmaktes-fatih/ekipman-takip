@@ -17,6 +17,29 @@
                 spacing: "12dp"
                 padding: "15dp"
 
+                MDBoxLayout:
+                    adaptive_height: True
+                    spacing: "10dp"
+
+                    MDRaisedButton:
+                        id: btn_etiket_cek
+                        text: "Etiketi Fotoğrafla"
+                        icon: "camera"
+                        size_hint_x: .5
+                        on_release: root.etiket_cek()
+
+                    MDRaisedButton:
+                        id: btn_etiket_sec
+                        text: "Galeriden Seç"
+                        size_hint_x: .5
+                        on_release: root.etiket_sec()
+
+                MDLabel:
+                    id: lbl_etiket_durum
+                    text: ""
+                    theme_text_color: "Secondary"
+                    adaptive_height: True
+
                 MDTextField:
                     id: txt_ad
                     hint_text: "Ekipman Adı"
