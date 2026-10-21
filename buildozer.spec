@@ -18,13 +18,13 @@ icon.adaptive_background.filename = %(source.dir)s/assets/icon_bg.png
 presplash.filename = %(source.dir)s/assets/presplash.png
 android.presplash_color = #017CBF
 
-requirements = python3==3.11.9,hostpython3==3.11.9,kivy==2.2.0,kivymd==1.2.0,requests
+requirements = python3==3.11.9,hostpython3==3.11.9,kivy==2.2.0,kivymd==1.2.0,requests,plyer,pillow
 
 orientation = portrait
 
 fullscreen = 0
 
-android.permissions = INTERNET,ACCESS_NETWORK_STATE
+android.permissions = INTERNET,ACCESS_NETWORK_STATE,CAMERA,READ_EXTERNAL_STORAGE,READ_MEDIA_IMAGES
 
 android.api = 33
 android.minapi = 21
