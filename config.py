@@ -37,6 +37,17 @@ NODE_EKIPMANLAR = "ekipmanlar"
 NODE_SORUMLULAR = "sorumlular"
 
 # --------------------------------------------------
+# ETİKET OKUMA (fotoğraftan ekipman kaydı)
+# --------------------------------------------------
+# Fotoğraf, Claude API anahtarını güvenli tutan küçük bir aracı servise
+# (proxy/worker.js) gönderilir. API anahtarı ASLA uygulamaya yazılmaz.
+
+ETIKET_API_URL = ""      # örn. "https://etiket-okuyucu.hesabiniz.workers.dev"
+ETIKET_API_TOKEN = ""    # worker'daki APP_TOKEN ile aynı değer
+ETIKET_MAX_KENAR = 1600  # gönderilmeden önce fotoğrafın uzun kenarı (px)
+ETIKET_TIMEOUT = 40      # saniye
+
+# --------------------------------------------------
 # TEMA
 # --------------------------------------------------
 
