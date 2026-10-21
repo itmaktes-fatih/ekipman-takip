@@ -90,6 +90,32 @@ class EkipmanService:
 
         return False
 
+    @staticmethod
+    def id_ile_bul(ekipman_id: str):
+        """Aktif ekipmanlar arasında ID'ye (seri no) göre kayıt bulur; yoksa None."""
+
+        hedef = (ekipman_id or "").strip().casefold()
+        if not hedef:
+            return None
+
+        data = firebase.ekipmanlari_getir()
+        if not isinstance(data, dict):
+            return None
+
+        for key, value in data.items():
+            if not isinstance(value, dict) or not value.get("aktif", True):
+                continue
+
+            if str(value.get("ekipman_id", "")).strip().casefold() == hedef:
+                try:
+                    ekipman = Ekipman.from_firebase(key, value)
+                except (TypeError, ValueError):
+                    return None
+                ekipman.sorumlu = EkipmanService.sorumlu_adi(ekipman)
+                return ekipman
+
+        return None
+
     # --------------------------------------------------
     # DASHBOARD
     # --------------------------------------------------
